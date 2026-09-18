@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<!-- ============ SEO ============ -->
+<title>Remoto — Remote jobs for top Latin American talent</title>
+<meta name="description" content="Live remote job listings open to talent across Latin America. Senior engineering, customer success, sales, design and ops roles at global companies — in your timezone." />
+<meta name="keywords" content="remote jobs latin america, trabajo remoto, latam remote talent, remote jobs mexico, empleos remotos, bilingual remote jobs, nearshore talent" />
+<meta name="robots" content="index,follow" />
+<link rel="canonical" href="https://YOURDOMAIN.com/" />
+<link rel="alternate" hreflang="en" href="https://YOURDOMAIN.com/?lang=en" />
+<link rel="alternate" hreflang="es" href="https://YOURDOMAIN.com/?lang=es" />
+<link rel="alternate" hreflang="x-default" href="https://YOURDOMAIN.com/" />
+
+<!-- ============ Open Graph ============ -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Remoto — Remote jobs for top Latin American talent" />
+<meta property="og:description" content="Live remote roles at global companies, open to talent across Latin America. Updated every day." />
+<meta property="og:url" content="https://YOURDOMAIN.com/" />
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌎</text></svg>" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<!-- ============ Site-level structured data ============ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Remoto",
+  "url": "https://YOURDOMAIN.com/",
+  "description": "Remote jobs for top Latin American talent.",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://YOURDOMAIN.com/?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+
+<style>
+  :root{
+    --ink:#12203A;        /* deep indigo — primary text & dark bands */
+    --ink-soft:#3a4a68;
+    --paper:#FBFAF7;      /* warm off-white */
+    --paper-2:#F1EFE8;    /* subtle panel */
+    --line:#E2DFD5;       /* hairlines */
+    --rosa:#E4007C;       /* rosa mexicano — the one bold accent */
+    --rosa-ink:#B10061;
+    --jade:#0E7C66;       /* agave jade — live + latam-friendly */
+    --jade-soft:#e4f2ee;
+    --muted:#6b7488;
+    --radius:14px;
+    --maxw:1080px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ink:#EDEFF5; --ink-soft:#b9c0d0; --paper:#0D1526; --paper-2:#141f36;
+      --line:#243350; --rosa:#ff4fa6; --rosa-ink:#ff7bbd; --jade:#38b39a;
+      --jade-soft:#12312b; --muted:#8a94ac;
+    }
+  }
+  :root[data-theme="light"]{
+    --ink:#12203A; --ink-soft:#3a4a68; --paper:#FBFAF7; --paper-2:#F1EFE8;
+    --line:#E2DFD5; --rosa:#E4007C; --rosa-ink:#B10061; --jade:#0E7C66;
+    --jade-soft:#e4f2ee; --muted:#6b7488;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:"Hanken Grotesk",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    font-size:17px; line-height:1.55; -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit}
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 22px}
+  h1,h2,h3{font-family:"Bricolage Grotesque",serif; font-weight:800; line-height:1.02; letter-spacing:-.02em; margin:0}
+
+  /* ---------- header ---------- */
+  header{position:sticky; top:0; z-index:50; background:color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter:saturate(1.4) blur(10px); border-bottom:1px solid var(--line)}
+  .bar{display:flex; align-items:center; gap:18px; height:62px}
+  .brand{font-family:"Bricolage Grotesque"; font-weight:800; font-size:20px; letter-spacing:-.03em; display:flex; align-items:center; gap:9px; text-decoration:none}
+  .globe{width:26px;height:26px;border-radius:8px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-size:15px}
+  .brand em{color:var(--rosa); font-style:normal}
+  .bar .spacer{flex:1}
+  .headcount{font-size:13px; color:var(--muted); display:flex; align-items:center; gap:7px; font-weight:500}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--jade);position:relative}
+  .dot::after{content:"";position:absolute;inset:-4px;border-radius:50%;background:var(--jade);opacity:.4;animation:pulse 2s ease-out infinite}
+  @keyframes pulse{0%{transform:scale(.6);opacity:.5}100%{transform:scale(2.4);opacity:0}}
+  @media (prefers-reduced-motion: reduce){.dot::after{animation:none}}
+  .langtog{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;font-size:13px;font-weight:600}
+  .langtog button{border:0;background:transparent;color:var(--muted);padding:6px 11px;cursor:pointer;font:inherit}
+  .langtog button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+  .btn{font:inherit;font-weight:600;font-size:15px;cursor:pointer;border-radius:999px;padding:9px 18px;border:1px solid transparent;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:transform .08s ease, background .15s ease}
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:var(--rosa);color:#fff}
+  .btn-primary:hover{background:var(--rosa-ink)}
+  .btn-ghost{border-color:var(--line);background:transparent;color:var(--ink)}
+  .btn-ghost:hover{background:var(--paper-2)}
+  .btn-dark{background:var(--ink);color:var(--paper)}
+
+  /* ---------- hero ---------- */
+  .hero{padding:64px 0 34px}
+  .kicker{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--jade);
+    background:var(--jade-soft);border:1px solid color-mix(in srgb,var(--jade) 30%, transparent);
+    padding:6px 13px;border-radius:999px;margin-bottom:22px}
+  .hero h1{font-size:clamp(38px,6.4vw,72px); max-width:14ch}
+  .hero h1 .rosa{color:var(--rosa)}
+  .hero p.sub{font-size:clamp(17px,2.2vw,21px); color:var(--ink-soft); max-width:52ch; margin:20px 0 30px}
+  .searchrow{display:flex; gap:10px; flex-wrap:wrap; max-width:620px}
+  .searchrow input{flex:1; min-width:220px; font:inherit; font-size:16px; padding:14px 18px; border:1.5px solid var(--line); border-radius:999px; background:var(--paper); color:var(--ink)}
+  .searchrow input:focus{outline:2px solid var(--rosa); outline-offset:1px; border-color:transparent}
+  .trust{margin-top:18px;font-size:13.5px;color:var(--muted)}
+
+  /* ---------- controls ---------- */
+  .controls{border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:16px 0; margin-top:14px;
+    position:sticky; top:62px; background:color-mix(in srgb,var(--paper) 92%, transparent); backdrop-filter:blur(8px); z-index:40}
+  .chips{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+  .chip{font:inherit;font-size:14px;font-weight:600;cursor:pointer;border:1px solid var(--line);background:transparent;color:var(--ink-soft);padding:7px 14px;border-radius:999px}
+  .chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .controls .meta{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:13.5px;color:var(--muted)}
+  .switch{display:inline-flex;align-items:center;gap:9px;cursor:pointer;user-select:none;font-weight:600;color:var(--ink)}
+  .switch input{position:absolute;opacity:0}
+  .track{width:38px;height:22px;border-radius:999px;background:var(--line);position:relative;transition:background .15s}
+  .track::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .15s;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+  .switch input:checked + .track{background:var(--jade)}
+  .switch input:checked + .track::after{transform:translateX(16px)}
+  .switch input:focus-visible + .track{outline:2px solid var(--rosa);outline-offset:2px}
+  .refresh{margin-left:auto;border:1px solid var(--line);background:transparent;color:var(--ink-soft);font:inherit;font-size:13px;font-weight:600;padding:6px 13px;border-radius:999px;cursor:pointer}
+
+  /* ---------- job list ---------- */
+  main{padding:8px 0 40px; min-height:40vh}
+  .job{display:grid; grid-template-columns:52px 1fr auto; gap:16px; align-items:start; padding:20px 14px; border-bottom:1px solid var(--line); text-decoration:none; color:inherit; transition:background .12s}
+  .job:hover{background:var(--paper-2)}
+  .logo{width:52px;height:52px;border-radius:12px;background:var(--paper-2);border:1px solid var(--line);display:grid;place-items:center;font-family:"Bricolage Grotesque";font-weight:800;font-size:22px;color:var(--ink)}
+  .job h3{font-size:19px;font-weight:700;letter-spacing:-.01em}
+  .co{font-size:14.5px;color:var(--ink-soft);margin-top:2px;font-weight:600}
+  .tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+  .tag{font-size:12px;font-weight:600;color:var(--ink-soft);background:var(--paper-2);border:1px solid var(--line);padding:3px 9px;border-radius:7px}
+  .tag.latam{color:#fff;background:var(--jade);border-color:var(--jade)}
+  .tag.salary{color:var(--jade);background:var(--jade-soft);border-color:transparent}
+  .side{text-align:right;font-size:13px;color:var(--muted);white-space:nowrap;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+  .apply{font-size:13px;font-weight:700;color:var(--rosa)}
+  .state{padding:60px 14px;text-align:center;color:var(--muted)}
+  .state h3{font-size:22px;color:var(--ink);margin-bottom:8px}
+  .spinner{width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--rosa);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @media (max-width:640px){
+    .job{grid-template-columns:44px 1fr;gap:13px}
+    .side{grid-column:2;flex-direction:row;justify-content:space-between;width:100%;margin-top:4px}
+    .logo{width:44px;height:44px;font-size:18px}
+    .controls{top:62px}
+  }
+
+  /* ---------- employer band ---------- */
+  .band{background:var(--ink); color:var(--paper); margin-top:20px}
+  :root[data-theme="light"] .band, :root:not([data-theme]) .band{--ink-soft:#c3ccdd}
+  .band .wrap{padding:64px 22px}
+  .band h2{font-size:clamp(30px,4.5vw,46px); color:var(--paper); max-width:18ch}
+  .band .lead{color:#c3ccdd; max-width:54ch; margin:18px 0 40px; font-size:18px}
+  .tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media (max-width:760px){.tiers{grid-template-columns:1fr}}
+  .tier{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:var(--radius);padding:24px}
+  .tier.feat{border-color:var(--rosa);background:rgba(228,0,124,.10)}
+  .tier .price{font-family:"Bricolage Grotesque";font-weight:800;font-size:32px;margin:6px 0 2px;color:var(--paper)}
+  .tier .per{font-size:13px;color:#aeb8cc}
+  .tier ul{list-style:none;padding:0;margin:16px 0 0;font-size:14.5px;color:#d5dbe8}
+  .tier li{padding:6px 0 6px 24px;position:relative}
+  .tier li::before{content:"→";position:absolute;left:0;color:var(--rosa);font-weight:700}
+  .tname{font-weight:700;font-size:15px;letter-spacing:.01em;color:var(--paper)}
+
+  /* ---------- forms ---------- */
+  .post{background:var(--paper-2);border-top:1px solid var(--line)}
+  .post .wrap{padding:56px 22px;max-width:720px}
+  .post h2{font-size:clamp(26px,4vw,38px)}
+  .field{display:block;margin-top:16px}
+  .field span{display:block;font-size:13.5px;font-weight:600;color:var(--ink-soft);margin-bottom:6px}
+  .field input,.field textarea{width:100%;font:inherit;font-size:16px;padding:12px 15px;border:1.5px solid var(--line);border-radius:12px;background:var(--paper);color:var(--ink)}
+  .field textarea{min-height:120px;resize:vertical}
+  .field input:focus,.field textarea:focus{outline:2px solid var(--rosa);outline-offset:1px;border-color:transparent}
+  .formnote{font-size:13px;color:var(--muted);margin-top:14px}
+
+  /* ---------- alerts ---------- */
+  .alerts{border-top:1px solid var(--line)}
+  .alerts .wrap{padding:52px 22px;text-align:center}
+  .alerts h2{font-size:clamp(24px,3.6vw,34px)}
+  .alerts p{color:var(--ink-soft);max-width:46ch;margin:12px auto 24px}
+  .alertform{display:flex;gap:10px;max-width:440px;margin:0 auto;flex-wrap:wrap}
+  .alertform input{flex:1;min-width:200px;font:inherit;font-size:16px;padding:13px 17px;border:1.5px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink)}
+
+  /* ---------- footer ---------- */
+  footer{border-top:1px solid var(--line);background:var(--paper)}
+  footer .wrap{padding:38px 22px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:13.5px;color:var(--muted)}
+  footer a{color:var(--ink-soft);text-decoration:none}
+  footer a:hover{color:var(--rosa)}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(120%);background:var(--ink);color:var(--paper);padding:13px 22px;border-radius:999px;font-size:14px;font-weight:600;transition:transform .3s cubic-bezier(.2,.9,.3,1);z-index:99}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="#top"><span class="globe">🌎</span> Rem<em>o</em>to</a>
+    <span class="headcount"><span class="dot"></span><span id="live-count">Loading roles…</span></span>
+    <span class="spacer"></span>
+    <div class="langtog" role="group" aria-label="Language">
+      <button data-lang="en" aria-pressed="true">EN</button>
+      <button data-lang="es" aria-pressed="false">ES</button>
+    </div>
+    <a class="btn btn-primary" href="#post" data-i18n="nav_post">Post a job</a>
+  </div>
+</header>
+
+<section class="hero" id="top">
+  <div class="wrap">
+    <span class="kicker"><span class="dot"></span><span data-i18n="hero_kicker">Live listings · updated daily</span></span>
+    <h1 data-i18n="hero_h1">Remote jobs that keep you in <span class="rosa">your timezone</span>.</h1>
+    <p class="sub" data-i18n="hero_sub">Senior roles at global companies, open to talent across Latin America. One page, updated every day — no endless scrolling across ten sites.</p>
+    <div class="searchrow">
+      <input id="hero-search" type="search" placeholder="Search role, skill or company…" data-i18n-ph="search_ph" aria-label="Search jobs" />
+      <a class="btn btn-dark" href="#jobs" data-i18n="hero_cta">Browse roles</a>
+    </div>
+    <p class="trust" data-i18n="hero_trust">Free for job seekers, always. Fresh roles pulled in automatically every day.</p>
+  </div>
+</section>
+
+<div class="controls" id="jobs">
+  <div class="wrap">
+    <div class="chips" id="chips"></div>
+    <div class="meta">
+      <label class="switch">
+        <input type="checkbox" id="latam-only" />
+        <span class="track"></span>
+        <span data-i18n="latam_toggle">LatAm-friendly only</span>
+      </label>
+      <label class="switch">
+        <input type="checkbox" id="salaried-only" />
+        <span class="track"></span>
+        <span data-i18n="salaried_toggle">Salary disclosed</span>
+      </label>
+      <span id="result-count"></span>
+      <span id="updated"></span>
+      <button class="refresh" id="refresh" data-i18n="refresh">↻ Refresh</button>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="wrap" id="job-list">
+    <div class="state"><div class="spinner"></div><span data-i18n="loading">Pulling in today’s remote roles…</span></div>
+  </div>
+  <div class="wrap" style="text-align:center;padding:6px 0 26px">
+    <button class="btn btn-ghost" id="load-more" style="display:none" data-i18n="load_more">Load more</button>
+  </div>
+</main>
+
+<!-- job listings structured data (Google for Jobs) injected here -->
+<script type="application/ld+json" id="jobs-ld"></script>
+
+<section class="band">
+  <div class="wrap">
+    <h2 data-i18n="emp_h2">Hire senior talent that works your hours.</h2>
+    <p class="lead" data-i18n="emp_lead">Latin American professionals overlap the full US workday — no 2am standups. Post your remote role in front of a focused, motivated audience.</p>
+    <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+      <a class="btn btn-primary" href="#post" data-i18n="t_cta">Post a job — free</a>
+      <span style="display:inline-flex;align-items:center;gap:9px;font-size:14.5px;color:#c3ccdd;font-weight:600"><span class="dot"></span><span data-i18n="emp_founding">Founding companies post free while we build the audience. No card, no catch.</span></span>
+    </div>
+  </div>
+</section>
+
+<section class="post" id="post">
+  <div class="wrap">
+    <h2 data-i18n="post_h2">Post a role</h2>
+    <p style="color:var(--ink-soft);margin-top:12px" data-i18n="post_sub">Send us the details and your listing goes live within a day. First post is free.</p>
+    <form id="post-form">
+      <label class="field"><span data-i18n="f_company">Company</span><input name="company" required /></label>
+      <label class="field"><span data-i18n="f_role">Role title</span><input name="role" required /></label>
+      <label class="field"><span data-i18n="f_link">Application link</span><input name="link" type="url" placeholder="https://" required /></label>
+      <label class="field"><span data-i18n="f_email">Your email</span><input name="from" type="email" required /></label>
+      <label class="field"><span data-i18n="f_details">Role details (salary, stack, timezone)</span><textarea name="details"></textarea></label>
+      <button class="btn btn-primary" type="submit" style="margin-top:20px" data-i18n="f_submit">Submit listing</button>
+      <p class="formnote" data-i18n="f_note">Opens your email app with everything filled in — just hit send.</p>
+    </form>
+  </div>
+</section>
+
+<section class="alerts">
+  <div class="wrap">
+    <h2 data-i18n="al_h2">Get the week’s best roles by email</h2>
+    <p data-i18n="al_p">A short weekly digest of the top remote jobs open to LatAm talent. No spam.</p>
+    <form class="alertform" id="alert-form">
+      <input name="email" type="email" placeholder="you@email.com" required aria-label="Email" />
+      <button class="btn btn-primary" type="submit" data-i18n="al_cta">Subscribe</button>
+    </form>
+  </div>
+</section>
+
+<section style="border-top:1px solid var(--line);background:var(--paper-2)">
+  <div class="wrap" style="padding:40px 22px">
+    <h2 style="font-size:22px;margin-bottom:16px" data-i18n="browse_h">Browse by role</h2>
+    <div style="display:flex;flex-wrap:wrap;gap:10px 24px;font-weight:600">
+      <a href="remote-software-engineering-jobs-latam.html" style="color:var(--ink-soft);text-decoration:none">Engineering</a>
+      <a href="remote-customer-success-jobs-latam.html" style="color:var(--ink-soft);text-decoration:none">Customer Success</a>
+      <a href="remote-sales-jobs-latin-america.html" style="color:var(--ink-soft);text-decoration:none">Sales</a>
+      <a href="remote-creative-game-film-animation-jobs-latam.html" style="color:var(--ink-soft);text-decoration:none">Creative &amp; Games</a>
+      <a href="trabajos-remotos-atencion-al-cliente-latam.html" style="color:var(--ink-soft);text-decoration:none">Atención al cliente (ES)</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>© <span id="year"></span> Remoto · <span data-i18n="ft_tag">Remote jobs for Latin American talent</span></div>
+    <div data-i18n="ft_credit">Live roles via Arbeitnow, Remotive &amp; Jobicy</div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   CONFIG — edit these five lines, then you're done.
+   ============================================================ */
+const CONFIG = {
+  BOARD_NAME:   "Remoto",
+  CONTACT_EMAIL:"you@youremail.com",     // where employer + subscriber emails land
+  DOMAIN:       "https://YOURDOMAIN.com",// your live URL (for links/SEO)
+  PAYMENT_LINK: "",                      // optional: Stripe/Gumroad/PayPal link for paid posts
+  FORMSPREE:    "",                      // optional: a free formspree.io endpoint for a real inbox instead of mailto
+
+  /* ---- Curation: keep it crème de la crème, never a firehose ---- */
+  MIN_SALARY:    100000,  // drop any role whose detectable pay is below this (USD/yr)
+  REQUIRE_SALARY:false,   // true = ONLY show roles that openly state pay (most premium, fewest roles)
+  PAGE_SIZE:     25,      // roles shown per page — a "Load more" reveals the next 25
+  MAX_JOBS:      100,     // absolute ceiling the board will ever show
+  BLOCK:         [],      // words/companies to always exclude, e.g. ["crypto","staffing","commission"]
+  PIN:           []       // words/companies to always float to the top, e.g. ["Stripe","Notion","Linear"]
+};
+
+/* ============================================================
+   Job categories — how listings get grouped into the chips.
+   ============================================================ */
+const CATEGORIES = [
+  { id:"all",     en:"All roles",        es:"Todos",            match:null },
+  { id:"eng",     en:"Engineering",      es:"Ingeniería",       match:["developer","engineer","software","backend","frontend","full stack","fullstack","devops","programador","react","python","node","java","golang","data engineer"] },
+  { id:"cs",      en:"Customer Success",  es:"Éxito del cliente", match:["customer success","customer support","support","success","account manager","help desk","soporte","atención"] },
+  { id:"sales",   en:"Sales",            es:"Ventas",           match:["sales","account executive","business development","sdr","bdr","ventas","revenue"] },
+  { id:"design",  en:"Design",           es:"Diseño",           match:["designer","design","ux","ui","product design","graphic","diseñador","brand"] },
+  { id:"mkt",     en:"Marketing",        es:"Marketing",        match:["marketing","seo","content","growth","social media","copywriter","community"] },
+  { id:"ops",     en:"Ops & VA",         es:"Ops y AV",         match:["virtual assistant","operations","project manager","admin","executive assistant","ops","coordinator","asistente"] },
+  { id:"data",    en:"Data",             es:"Datos",            match:["data","analyst","analytics","machine learning","ml","ai","scientist","datos"] },
+  { id:"creative",en:"Creative",         es:"Creativos",        match:["game","gamedev","video game","unity","unreal","animation","animator","3d artist","vfx","motion design","motion graphics","film","video editor","cinematograph","art director","illustrator","concept art","creative director","post-production","storyboard","character artist","game design","level design","video producer","commercial"] }
+];
+
+/* Signals that a remote role is open to LatAm / the Americas / bilingual talent. */
+const LATAM_SIGNALS = ["worldwide","global","anywhere","americas","latin america","latam","south america","central america","mexico","méxico","argentina","brazil","brasil","colombia","chile","peru","spanish","bilingual","español","bilingüe","emea/amer","est","cst","gmt-","utc-3","utc-4","utc-5","utc-6"];
+/* Locations that usually EXCLUDE LatAm applicants — used to demote, not hide. */
+const EXCLUDE_SIGNALS = ["us only","usa only","united states only","us-only","eu only","europe only","uk only","canada only","must be located in the us","authorized to work in the us"];
+
+/* Curation signals */
+const JUNK_SIGNALS = ["junior","jr ","jr.","intern","internship","entry level","entry-level","trainee","apprentice","graduate program","graduate scheme","volunteer","unpaid","commission only","commission-only","no experience required"];
+const SENIOR_SIGNALS = ["senior","sr ","sr.","lead","staff","principal","head of","director","architect","expert","manager","vp of","chief","tech lead"];
+
+/* ============================================================
+   i18n
+   ============================================================ */
+const I18N = {
+  en:{ nav_post:"Post a job", hero_kicker:"Hand-curated · only the best-paid roles",
+    hero_h1:'Remote jobs that keep you in <span class="rosa">your timezone</span>.',
+    hero_sub:"A tight, curated board of high-paying remote roles open to Latin American talent. We screen out the noise — only the crème de la crème makes it in.",
+    search_ph:"Search role, skill or company…", hero_cta:"Browse roles",
+    hero_trust:"Free for job seekers. Every role is screened for pay and seniority — no spam, no low-ball listings.",
+    latam_toggle:"LatAm-friendly only", salaried_toggle:"Salary disclosed", refresh:"↻ Refresh", loading:"Pulling in today’s remote roles…", load_more:"Load more",
+    emp_h2:"Hire senior talent that works your hours.",
+    emp_lead:"Latin American professionals overlap the full US workday — no 2am standups. Post your remote role in front of a focused, motivated audience.",
+    t1_name:"First post", t1_price:"Free", t1_per:"launch offer · 30 days", t1_a:"One live listing for 30 days", t1_b:"Prove the audience, then decide",
+    t2_name:"Featured", t2_price:"$99", t2_per:"per listing · 30 days", t2_a:"Pinned to the top of the board", t2_b:"Highlighted in the weekly email", t2_c:"Company logo on the listing",
+    t3_name:"Growth", t3_price:"$249", t3_per:"per month", t3_a:"Up to 3 active listings", t3_b:"All featured perks", t3_c:"Cancel anytime",
+    t_cta:"Post a job — free", t_cta2:"Get featured", emp_founding:"Founding companies post free while we build the audience. No card, no catch.",
+    post_h2:"Post a role", post_sub:"Send us the details and your listing goes live within a day. First post is free.",
+    f_company:"Company", f_role:"Role title", f_link:"Application link", f_email:"Your email", f_details:"Role details (salary, stack, timezone)", f_submit:"Submit listing",
+    f_note:"Opens your email app with everything filled in — just hit send.",
+    al_h2:"Get the week’s best roles by email", al_p:"A short weekly digest of the top remote jobs open to LatAm talent. No spam.", al_cta:"Subscribe",
+    ft_tag:"Remote jobs for Latin American talent", ft_credit:"Live roles via Arbeitnow, Remotive & Jobicy", browse_h:"Browse by role",
+    latam_badge:"LatAm-friendly", apply:"Apply →", posted:"Posted", results:(n)=>`${n} curated roles`, none_h:"No roles match that yet",
+    none_p:"Try a different search or turn off the LatAm-only filter.", updated:(t)=>`updated ${t}`, err_h:"Couldn’t reach the job feeds",
+    err_p:"This page loads live jobs over the network. Host it (or serve it locally) and it’ll fill right up. Tap refresh to try again." },
+  es:{ nav_post:"Publicar empleo", hero_kicker:"Selección curada · solo los mejor pagados",
+    hero_h1:'Empleos remotos que respetan <span class="rosa">tu zona horaria</span>.',
+    hero_sub:"Un tablero curado de empleos remotos bien pagados, abiertos a talento latinoamericano. Filtramos el ruido — solo la crème de la crème entra.",
+    search_ph:"Busca puesto, habilidad o empresa…", hero_cta:"Ver vacantes",
+    hero_trust:"Gratis para candidatos. Cada vacante se filtra por salario y seniority — sin spam, sin ofertas mediocres.",
+    latam_toggle:"Solo abiertas a LatAm", salaried_toggle:"Con salario", refresh:"↻ Actualizar", loading:"Cargando las vacantes de hoy…", load_more:"Ver más",
+    emp_h2:"Contrata talento senior en tu horario.",
+    emp_lead:"Los profesionales de Latinoamérica coinciden con toda la jornada de EE. UU. Publica tu vacante remota frente a una audiencia enfocada y motivada.",
+    t1_name:"Primera publicación", t1_price:"Gratis", t1_per:"oferta de lanzamiento · 30 días", t1_a:"Una vacante activa por 30 días", t1_b:"Comprueba la audiencia y decide",
+    t2_name:"Destacada", t2_price:"$99", t2_per:"por vacante · 30 días", t2_a:"Fijada al inicio del tablero", t2_b:"Destacada en el email semanal", t2_c:"Logo de tu empresa en la vacante",
+    t3_name:"Crecimiento", t3_price:"$249", t3_per:"por mes", t3_a:"Hasta 3 vacantes activas", t3_b:"Todos los beneficios destacados", t3_c:"Cancela cuando quieras",
+    t_cta:"Publicar empleo — gratis", t_cta2:"Destacar vacante", emp_founding:"Las empresas fundadoras publican gratis mientras construimos la audiencia. Sin tarjeta, sin trucos.",
+    post_h2:"Publica una vacante", post_sub:"Envíanos los detalles y tu vacante estará en vivo en un día. La primera es gratis.",
+    f_company:"Empresa", f_role:"Puesto", f_link:"Enlace para postularse", f_email:"Tu correo", f_details:"Detalles (salario, stack, zona horaria)", f_submit:"Enviar vacante",
+    f_note:"Abre tu correo con todo listo — solo dale enviar.",
+    al_h2:"Recibe las mejores vacantes por correo", al_p:"Un resumen semanal de los mejores empleos remotos abiertos a talento LatAm. Sin spam.", al_cta:"Suscribirme",
+    ft_tag:"Empleos remotos para talento latinoamericano", ft_credit:"Vacantes en vivo vía Arbeitnow, Remotive y Jobicy", browse_h:"Explora por rol",
+    latam_badge:"Abierta a LatAm", apply:"Postularme →", posted:"Publicado", results:(n)=>`${n} vacantes seleccionadas`, none_h:"Aún no hay vacantes que coincidan",
+    none_p:"Prueba otra búsqueda o desactiva el filtro de solo-LatAm.", updated:(t)=>`actualizado ${t}`, err_h:"No se pudo conectar con las fuentes",
+    err_p:"Esta página carga vacantes en vivo por internet. Súbela a un hosting (o sírvela localmente) y se llenará. Toca actualizar para reintentar." }
+};
+
+let LANG = (new URLSearchParams(location.search).get("lang") === "es") ? "es" : "en";
+let ALL_JOBS = [];
+let activeCat = "all";
+let latamOnly = false;
+let salariedOnly = false;
+let shown = CONFIG.PAGE_SIZE;
+let query = "";
+const t = (k) => I18N[LANG][k];
+
+/* ---------- helpers ---------- */
+const stripHtml = (h) => { const d=document.createElement("div"); d.innerHTML=h||""; return (d.textContent||"").replace(/\s+/g," ").trim(); };
+const esc = (s) => (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const initials = (s) => (s||"?").trim().slice(0,2).toUpperCase();
+function timeAgo(dateStr){
+  const d = new Date(dateStr); if(isNaN(d)) return "";
+  const days = Math.floor((Date.now()-d.getTime())/864e5);
+  if(days<=0) return LANG==="es"?"hoy":"today";
+  if(days===1) return LANG==="es"?"ayer":"1d ago";
+  if(days<7) return LANG==="es"?`hace ${days}d`:`${days}d ago`;
+  const w=Math.floor(days/7); return LANG==="es"?`hace ${w}sem`:`${w}w ago`;
+}
+
+/* ---------- fetch + normalize from three free, keyless feeds ---------- */
+async function fetchArbeitnow(){
+  const out=[];
+  for(let p=1;p<=2;p++){
+    try{
+      const r=await fetch(`https://www.arbeitnow.com/api/job-board-api?page=${p}`);
+      const j=await r.json();
+      (j.data||[]).forEach(x=>out.push({
+        id:"an-"+x.slug, title:x.title, company:x.company_name, url:x.url,
+        remote:!!x.remote, location:x.location||"", tags:x.tags||[],
+        description:x.description||"", created:x.created_at?new Date(x.created_at*1000).toISOString():new Date().toISOString(),
+        salary:"", source:"Arbeitnow"
+      }));
+    }catch(e){/* skip page */}
+  }
+  return out.filter(j=>j.remote); // this board is remote-only
+}
+async function fetchRemotive(){
+  try{
+    const r=await fetch("https://remotive.com/api/remote-jobs");
+    const j=await r.json();
+    return (j.jobs||[]).map(x=>({
+      id:"rm-"+x.id, title:x.title, company:x.company_name, url:x.url, remote:true,
+      location:x.candidate_required_location||"", tags:x.tags||[], description:x.description||"",
+      created:x.publication_date||new Date().toISOString(), salary:x.salary||"", source:"Remotive"
+    }));
+  }catch(e){ return []; }
+}
+async function fetchJobicy(){
+  try{
+    const r=await fetch("https://jobicy.com/api/v2/remote-jobs?count=50");
+    const j=await r.json();
+    return (j.jobs||[]).map(x=>({
+      id:"jb-"+x.id, title:x.jobTitle, company:x.companyName, url:x.url, remote:true,
+      location:x.jobGeo||"", tags:[].concat(x.jobIndustry||[],x.jobLevel||[]),
+      description:x.jobExcerpt||x.jobDescription||"",
+      created:x.pubDate||new Date().toISOString(),
+      salary:(x.annualSalaryMin&&x.annualSalaryMax)?`$${(+x.annualSalaryMin/1000)|0}k–$${(+x.annualSalaryMax/1000)|0}k`:"",
+      source:"Jobicy"
+    }));
+  }catch(e){ return []; }
+}
+
+/* Daily cache written by the GitHub Action (fetch-jobs.js) — loads instantly and
+   keeps the board full even if a live feed is momentarily down. */
+async function fetchCache(){
+  try{ const r=await fetch("./jobs.json",{cache:"no-store"}); if(!r.ok) return [];
+    const j=await r.json(); return Array.isArray(j)?j:(j.jobs||[]); }catch(e){ return []; }
+}
+
+function dedupe(jobs){
+  const seen=new Set(); const out=[];
+  for(const j of jobs){
+    if(!j.title||!j.company) continue;
+    const key=(j.company+"|"+j.title).toLowerCase().replace(/\s+/g," ").trim();
+    if(seen.has(key)) continue; seen.add(key); out.push(j);
+  }
+  return out;
+}
+
+function latamScore(j){
+  const hay=(j.location+" "+j.title+" "+(j.tags||[]).join(" ")+" "+stripHtml(j.description)).toLowerCase();
+  if(EXCLUDE_SIGNALS.some(s=>hay.includes(s))) return -1;
+  return LATAM_SIGNALS.some(s=>hay.includes(s)) ? 1 : 0;
+}
+function catMatch(j,cat){
+  if(cat==="all") return true;
+  const def=CATEGORIES.find(c=>c.id===cat); if(!def||!def.match) return true;
+  const hay=(j.title+" "+(j.tags||[]).join(" ")).toLowerCase();
+  return def.match.some(m=>hay.includes(m));
+}
+
+/* ---------- curation: pay + seniority + no junk ---------- */
+function parseSalary(job){
+  const txt=((job.salary||"")+" "+(job.title||"")+" "+stripHtml(job.description||"")).toLowerCase();
+  let best=0;
+  (txt.match(/\$?\s?(\d{2,3})\s?k\b/g)||[]).forEach(m=>{ const n=parseInt(m.replace(/[^\d]/g,""),10)*1000; if(n>best) best=n; });
+  (txt.match(/\$\s?\d{2,3}(?:[,\.]\d{3})+/g)||[]).forEach(m=>{ const n=parseInt(m.replace(/[^\d]/g,""),10); if(n>=30000&&n<=1000000&&n>best) best=n; });
+  (txt.match(/\$\s?(\d{2,3})(?:\.\d+)?\s?(?:\/\s?hr|\/\s?hour|per hour|hourly|\/h\b)/g)||[]).forEach(m=>{ const n=parseInt(m.replace(/[^\d]/g,""),10)*2080; if(n>best) best=n; });
+  return best;
+}
+function hasWord(job,list){ const h=(job.title+" "+job.company+" "+(job.tags||[]).join(" ")).toLowerCase(); return list.some(w=>h.includes(w)); }
+function isJunk(job){ return JUNK_SIGNALS.some(w=>job.title.toLowerCase().includes(w)); }
+function isSenior(job){ return SENIOR_SIGNALS.some(w=>job.title.toLowerCase().includes(w)); }
+function isBlocked(job){ return (CONFIG.BLOCK||[]).length ? hasWord(job,(CONFIG.BLOCK||[]).map(s=>s.toLowerCase())) : false; }
+function isPinned(job){ return (CONFIG.PIN||[]).length ? hasWord(job,(CONFIG.PIN||[]).map(s=>s.toLowerCase())) : false; }
+
+function passesCuration(job){
+  if(isJunk(job) || isBlocked(job)) return false;
+  if((job.title||"").length<3 || (job.company||"").length<2) return false;
+  const sal = job._sal!=null ? job._sal : parseSalary(job);
+  if(sal && sal < CONFIG.MIN_SALARY) return false;                 // low payer → out
+  if((CONFIG.REQUIRE_SALARY || salariedOnly) && !sal) return false; // strict salary-only view
+  return true;
+}
+function qualityScore(job){
+  const sal = job._sal!=null ? job._sal : parseSalary(job);
+  let s=0;
+  if(sal>=CONFIG.MIN_SALARY) s += 60 + Math.min(60,(sal-CONFIG.MIN_SALARY)/4000);
+  if(isSenior(job)) s += 25;
+  if(latamScore(job)===1) s += 20;
+  const dl=stripHtml(job.description||"").length;
+  if(dl>300) s+=8; if(dl>800) s+=6;
+  if((job.tags||[]).length) s+=4;
+  const days=(Date.now()-new Date(job.created))/864e5;
+  if(days<=2) s+=10; else if(days<=7) s+=5;
+  if(isPinned(job)) s+=1000;   // editorial pin floats to the very top
+  return s;
+}
+
+/* ---------- render ---------- */
+function render(){
+  const list=document.getElementById("job-list");
+  let jobs=ALL_JOBS.slice();
+  jobs.forEach(j=>{ j._latam=latamScore(j); j._sal=parseSalary(j); j._pin=isPinned(j)?1:0; j._score=qualityScore(j); });
+  jobs=jobs.filter(passesCuration);                 // curation gate: high pay / senior / no junk
+  if(latamOnly) jobs=jobs.filter(j=>j._latam===1);
+  jobs=jobs.filter(j=>catMatch(j,activeCat));
+  if(query){ const q=query.toLowerCase(); jobs=jobs.filter(j=>(j.title+" "+j.company+" "+(j.tags||[]).join(" ")).toLowerCase().includes(q)); }
+  // order: editorial pins → salary-disclosed → best score → newest
+  const hasSal = j => (j._sal>0?1:0);
+  jobs.sort((a,b)=> (b._pin-a._pin) || (hasSal(b)-hasSal(a)) || (b._score-a._score) || (new Date(b.created)-new Date(a.created)));
+  const pool = jobs.slice(0, CONFIG.MAX_JOBS);   // overall ceiling
+  const visible = pool.slice(0, shown);          // current page window (25 at a time)
+
+  document.getElementById("result-count").textContent = t("results")(pool.length);
+  const lm = document.getElementById("load-more");
+
+  if(!pool.length){
+    list.innerHTML=`<div class="state"><h3>${esc(t("none_h"))}</h3><p>${esc(t("none_p"))}</p></div>`;
+    document.getElementById("jobs-ld").textContent="";
+    if(lm) lm.style.display="none";
+    return;
+  }
+
+  list.innerHTML = visible.map(j=>{
+    const friendly = j._latam===1;
+    const tags = (j.tags||[]).slice(0,3).map(x=>`<span class="tag">${esc(x)}</span>`).join("");
+    const salTxt = j.salary || (j._sal ? `$${Math.round(j._sal/1000)}k` : "");
+    const sal = salTxt?`<span class="tag salary">${esc(salTxt)}</span>`:"";
+    const badge = friendly?`<span class="tag latam">${esc(t("latam_badge"))}</span>`:"";
+    return `<a class="job" href="${esc(j.url)}" target="_blank" rel="noopener">
+      <div class="logo">${esc(initials(j.company))}</div>
+      <div>
+        <h3>${esc(j.title)}</h3>
+        <div class="co">${esc(j.company)}${j.location?` · ${esc(j.location)}`:""}</div>
+        <div class="tags">${badge}${sal}${tags}</div>
+      </div>
+      <div class="side"><span class="apply">${esc(t("apply"))}</span><span>${esc(timeAgo(j.created))}</span></div>
+    </a>`;
+  }).join("");
+
+  injectJobsLD(visible);
+  if(lm) lm.style.display = pool.length > visible.length ? "inline-flex" : "none";
+}
+
+/* Google for Jobs — JobPosting structured data for the visible roles */
+function injectJobsLD(jobs){
+  const items = jobs.map((j,i)=>({
+    "@type":"ListItem","position":i+1,
+    "item":{
+      "@type":"JobPosting",
+      "title":j.title,
+      "description":stripHtml(j.description).slice(0,4000) || j.title,
+      "datePosted":j.created,
+      "employmentType":"FULL_TIME",
+      "hiringOrganization":{"@type":"Organization","name":j.company},
+      "jobLocationType":"TELECOMMUTE",
+      "applicantLocationRequirements":{"@type":"Country","name":"Latin America"},
+      "directApply":false,
+      "url":j.url
+    }
+  }));
+  document.getElementById("jobs-ld").textContent = JSON.stringify({
+    "@context":"https://schema.org","@type":"ItemList","itemListElement":items
+  });
+}
+
+/* ---------- UI wiring ---------- */
+function buildChips(){
+  const wrap=document.getElementById("chips");
+  wrap.innerHTML=CATEGORIES.map(c=>`<button class="chip" data-cat="${c.id}" aria-pressed="${c.id===activeCat}">${c[LANG]}</button>`).join("");
+  wrap.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{activeCat=b.dataset.cat; shown=CONFIG.PAGE_SIZE; buildChips(); render();});
+}
+function applyLang(){
+  document.documentElement.lang=LANG;
+  document.querySelectorAll("[data-i18n]").forEach(el=>{ const k=el.getAttribute("data-i18n"); if(I18N[LANG][k]!=null) el.innerHTML=I18N[LANG][k]; });
+  document.querySelectorAll("[data-i18n-ph]").forEach(el=>{ const k=el.getAttribute("data-i18n-ph"); if(I18N[LANG][k]!=null) el.placeholder=I18N[LANG][k]; });
+  document.querySelectorAll(".langtog button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.lang===LANG));
+  buildChips(); if(ALL_JOBS.length) render();
+}
+function toast(msg){ const el=document.getElementById("toast"); el.textContent=msg; el.classList.add("show"); setTimeout(()=>el.classList.remove("show"),3200); }
+
+async function load(){
+  const list=document.getElementById("job-list");
+  list.innerHTML=`<div class="state"><div class="spinner"></div><span>${esc(t("loading"))}</span></div>`;
+  const results = await Promise.all([fetchCache(), fetchArbeitnow(), fetchRemotive(), fetchJobicy()]);
+  ALL_JOBS = dedupe([].concat(...results));
+  if(!ALL_JOBS.length){
+    list.innerHTML=`<div class="state"><h3>${esc(t("err_h"))}</h3><p>${esc(t("err_p"))}</p></div>`;
+    document.getElementById("live-count").textContent = "—";
+    return;
+  }
+  const now = new Date().toLocaleTimeString(LANG==="es"?"es-MX":"en-US",{hour:"2-digit",minute:"2-digit"});
+  document.getElementById("updated").textContent = t("updated")(now);
+  document.getElementById("live-count").textContent = (LANG==="es"?`${ALL_JOBS.length} vacantes en vivo`:`${ALL_JOBS.length} live roles`);
+  render();
+}
+
+/* language buttons */
+document.querySelectorAll(".langtog button").forEach(b=>b.onclick=()=>{ LANG=b.dataset.lang; shown=CONFIG.PAGE_SIZE; applyLang();
+  const now=new Date().toLocaleTimeString(LANG==="es"?"es-MX":"en-US",{hour:"2-digit",minute:"2-digit"});
+  if(ALL_JOBS.length){ document.getElementById("updated").textContent=t("updated")(now);
+    document.getElementById("live-count").textContent=(LANG==="es"?`${ALL_JOBS.length} vacantes en vivo`:`${ALL_JOBS.length} live roles`);} });
+
+/* search (hero + live) */
+document.getElementById("hero-search").addEventListener("input",e=>{ query=e.target.value; shown=CONFIG.PAGE_SIZE; if(ALL_JOBS.length) render(); });
+document.getElementById("latam-only").addEventListener("change",e=>{ latamOnly=e.target.checked; shown=CONFIG.PAGE_SIZE; render(); });
+document.getElementById("salaried-only").addEventListener("change",e=>{ salariedOnly=e.target.checked; shown=CONFIG.PAGE_SIZE; render(); });
+document.getElementById("load-more").addEventListener("click",()=>{ shown+=CONFIG.PAGE_SIZE; render(); });
+document.getElementById("refresh").addEventListener("click",load);
+
+/* employer post form -> mailto (or Formspree if configured) */
+document.getElementById("post-form").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const f=e.target, d=Object.fromEntries(new FormData(f));
+  if(CONFIG.FORMSPREE){
+    try{ await fetch(CONFIG.FORMSPREE,{method:"POST",headers:{"Accept":"application/json"},body:new FormData(f)});
+      toast(LANG==="es"?"¡Vacante enviada!":"Listing sent!"); f.reset(); return; }catch(_){}
+  }
+  const subj=encodeURIComponent(`[Job listing] ${d.role} — ${d.company}`);
+  const body=encodeURIComponent(`Company: ${d.company}\nRole: ${d.role}\nApply link: ${d.link}\nContact: ${d.from}\n\nDetails:\n${d.details||""}`);
+  window.location.href=`mailto:${CONFIG.CONTACT_EMAIL}?subject=${subj}&body=${body}`;
+  toast(LANG==="es"?"Abriendo tu correo…":"Opening your email…");
+});
+
+/* alert signup */
+document.getElementById("alert-form").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const f=e.target, email=new FormData(f).get("email");
+  if(CONFIG.FORMSPREE){
+    try{ await fetch(CONFIG.FORMSPREE,{method:"POST",headers:{"Accept":"application/json"},body:new FormData(f)});
+      toast(LANG==="es"?"¡Suscrito!":"Subscribed!"); f.reset(); return; }catch(_){}
+  }
+  window.location.href=`mailto:${CONFIG.CONTACT_EMAIL}?subject=${encodeURIComponent("Job alerts signup")}&body=${encodeURIComponent("Please add me to the weekly digest: "+email)}`;
+  toast(LANG==="es"?"Abriendo tu correo…":"Opening your email…");
+});
+
+/* init */
+document.getElementById("year").textContent=new Date().getFullYear();
+document.title = `${CONFIG.BOARD_NAME} — ${LANG==="es"?"Empleos remotos para talento latinoamericano":"Remote jobs for top Latin American talent"}`;
+applyLang();
+load();
+setInterval(load, 30*60*1000); // auto-refresh the board every 30 minutes
+</script>
+</body>
+</html>
