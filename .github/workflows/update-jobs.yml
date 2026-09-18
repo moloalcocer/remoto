@@ -1,0 +1,28 @@
+name: Update jobs daily
+
+# Runs every day and refreshes jobs.json automatically — even with zero visitors.
+on:
+  schedule:
+    - cron: "0 6 * * *"     # 06:00 UTC daily (adjust the hour if you like)
+  workflow_dispatch: {}       # also lets you trigger it by hand from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Fetch latest jobs
+        run: node fetch-jobs.js
+      - name: Commit refreshed jobs.json
+        run: |
+          git config user.name "remoto-bot"
+          git config user.email "remoto-bot@users.noreply.github.com"
+          git add jobs.json
+          git commit -m "Daily job refresh" || echo "No changes today"
+          git push
