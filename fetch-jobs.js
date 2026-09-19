@@ -43,7 +43,7 @@ function norm(c,id,title,url,remote,location,tags,description,created){
   if(typeof created==="number") iso=new Date(created).toISOString();
   else { const d=new Date(created); iso=isNaN(d)?new Date().toISOString():d.toISOString(); }
   return { id:c.ats+"-"+(c.token||c.name||"co").toString().toLowerCase().replace(/\W+/g,"")+"-"+id, title:title||"", company:c.name, url:url||"",
-    remote:!!remote, relocate:!remote, location:location||"", tags:tags||[],
+    remote:!!remote, relocate:!remote, direct:true, location:location||"", tags:tags||[],
     description:description||"", created:iso, salary:"", source:c.name };
 }
 
@@ -123,7 +123,7 @@ async function arbeitnow(){
   for(let p=1;p<=3;p++){
     try{ const r=await fetch(`https://www.arbeitnow.com/api/job-board-api?page=${p}`); const j=await r.json();
       (j.data||[]).forEach(x=>{ if(!x.remote) return;
-        out.push({ id:"an-"+x.slug, title:x.title, company:x.company_name, url:x.url, remote:true, relocate:false,
+        out.push({ id:"an-"+x.slug, title:x.title, company:x.company_name, url:x.url, remote:true, relocate:false, direct:false,
           location:x.location||"", tags:x.tags||[], description:x.description||"",
           created:x.created_at?new Date(x.created_at*1000).toISOString():new Date().toISOString(), salary:"", source:"Arbeitnow" }); });
     }catch(e){ console.error("arbeitnow page "+p, e.message); }
@@ -132,14 +132,14 @@ async function arbeitnow(){
 }
 async function remotive(){
   try{ const r=await fetch("https://remotive.com/api/remote-jobs"); const j=await r.json();
-    return (j.jobs||[]).map(x=>({ id:"rm-"+x.id, title:x.title, company:x.company_name, url:x.url, remote:true, relocate:false,
+    return (j.jobs||[]).map(x=>({ id:"rm-"+x.id, title:x.title, company:x.company_name, url:x.url, remote:true, relocate:false, direct:false,
       location:x.candidate_required_location||"", tags:x.tags||[], description:x.description||"",
       created:x.publication_date||new Date().toISOString(), salary:x.salary||"", source:"Remotive" }));
   }catch(e){ console.error("remotive", e.message); return []; }
 }
 async function jobicy(){
   try{ const r=await fetch("https://jobicy.com/api/v2/remote-jobs?count=50"); const j=await r.json();
-    return (j.jobs||[]).map(x=>({ id:"jb-"+x.id, title:x.jobTitle, company:x.companyName, url:x.url, remote:true, relocate:false,
+    return (j.jobs||[]).map(x=>({ id:"jb-"+x.id, title:x.jobTitle, company:x.companyName, url:x.url, remote:true, relocate:false, direct:false,
       location:x.jobGeo||"", tags:[].concat(x.jobIndustry||[], x.jobLevel||[]),
       description:x.jobExcerpt||x.jobDescription||"", created:x.pubDate||new Date().toISOString(),
       salary:(x.annualSalaryMin&&x.annualSalaryMax)?`$${(+x.annualSalaryMin/1000)|0}k–$${(+x.annualSalaryMax/1000)|0}k`:"", source:"Jobicy" }));
