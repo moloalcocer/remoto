@@ -329,7 +329,7 @@
    ============================================================ */
 const CONFIG = {
   BOARD_NAME:   "Remoto",
-  CONTACT_EMAIL:"molo.alcocer@gmail.com",     // where employer + subscriber emails land
+  CONTACT_EMAIL:"you@youremail.com",     // where employer + subscriber emails land
   DOMAIN:       "https://YOURDOMAIN.com",// your live URL (for links/SEO)
   PAYMENT_LINK: "",                      // optional: Stripe/Gumroad/PayPal link for paid posts
   FORMSPREE:    "",                      // optional: a free formspree.io endpoint for a real inbox instead of mailto
@@ -355,7 +355,10 @@ const CATEGORIES = [
   { id:"mkt",     en:"Marketing",        es:"Marketing",        match:["marketing","seo","content","growth","social media","copywriter","community"] },
   { id:"ops",     en:"Ops & VA",         es:"Ops y AV",         match:["virtual assistant","operations","project manager","admin","executive assistant","ops","coordinator","asistente"] },
   { id:"data",    en:"Data",             es:"Datos",            match:["data","analyst","analytics","machine learning","ml","ai","scientist","datos"] },
-  { id:"creative",en:"Creative",         es:"Creativos",        match:["game","gamedev","video game","unity","unreal","animation","animator","3d artist","vfx","motion design","motion graphics","film","video editor","cinematograph","art director","illustrator","concept art","creative director","post-production","storyboard","character artist","game design","level design","video producer","commercial"] }
+  { id:"creative",en:"Creative",         es:"Creativos",        match:["game","gamedev","video game","unity","unreal","animation","animator","3d artist","vfx","motion design","motion graphics","film","video editor","cinematograph","art director","illustrator","concept art","creative director","post-production","storyboard","character artist","game design","level design","video producer","commercial"] },
+  { id:"finance", en:"Finance",          es:"Finanzas",         match:["finance","financial","accounting","controller","fp&a","treasury","investment","tax","audit","banking","cfo","equity research","portfolio"] },
+  { id:"product", en:"Product",          es:"Producto",         match:["product manager","product owner","head of product","product lead","program manager","technical product","product management","group product"] },
+  { id:"relocate",en:"Willing to relocate?", es:"¿Dispuesto a mudarte?", match:null }
 ];
 
 /* Signals that a remote role is open to LatAm / the Americas / bilingual talent. */
@@ -550,10 +553,18 @@ function render(){
   const list=document.getElementById("job-list");
   let jobs=ALL_JOBS.slice();
   jobs.forEach(j=>{ j._latam=latamScore(j); j._sal=parseSalary(j); j._pin=isPinned(j)?1:0; j._score=qualityScore(j); });
-  jobs=jobs.filter(passesCuration);                 // curation gate: high pay / senior / no junk
-  if(latamOnly) jobs=jobs.filter(j=>j._latam===1);
-  jobs=jobs.filter(j=>catMatch(j,activeCat));
-  if(query){ const q=query.toLowerCase(); jobs=jobs.filter(j=>(j.title+" "+j.company+" "+(j.tags||[]).join(" ")).toLowerCase().includes(q)); }
+  const relocateView = (activeCat==="relocate");
+  if(relocateView){
+    jobs=jobs.filter(j=>j.relocate && !isJunk(j));       // prestige onsite roles for people open to moving
+    if(salariedOnly) jobs=jobs.filter(j=>j._sal>0);
+    if(query){ const q=query.toLowerCase(); jobs=jobs.filter(j=>(j.title+" "+j.company+" "+(j.tags||[]).join(" ")).toLowerCase().includes(q)); }
+  }else{
+    jobs=jobs.filter(j=>!j.relocate);                    // main board stays remote-only
+    jobs=jobs.filter(passesCuration);                    // curation gate: high pay / senior / no junk
+    if(latamOnly) jobs=jobs.filter(j=>j._latam===1);
+    jobs=jobs.filter(j=>catMatch(j,activeCat));
+    if(query){ const q=query.toLowerCase(); jobs=jobs.filter(j=>(j.title+" "+j.company+" "+(j.tags||[]).join(" ")).toLowerCase().includes(q)); }
+  }
   // order: editorial pins → salary-disclosed → best score → newest
   const hasSal = j => (j._sal>0?1:0);
   jobs.sort((a,b)=> (b._pin-a._pin) || (hasSal(b)-hasSal(a)) || (b._score-a._score) || (new Date(b.created)-new Date(a.created)));
