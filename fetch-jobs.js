@@ -18,33 +18,71 @@ const fs = require("fs");
    Tokens marked VERIFY are examples — confirm the slug loads before trusting it.
    ============================================================ */
 const COMPANIES = [
-  // Amazon uses its own public search — tune the query to the roles you want.
-  { name:"Amazon (Studios & Creative)", ats:"amazon", query:"creative" },
+  // ---- Amazon (its own public search) ----
+  { name:"Amazon", ats:"amazon", query:"creative" },
 
-  // Workday companies — just paste the careers URL that ends in myworkdayjobs.com/...
+  // ---- Greenhouse (token = the slug in boards.greenhouse.io/<token>) ----
+  { name:"Anthropic",  ats:"greenhouse", token:"anthropic" },
+  { name:"Stripe",     ats:"greenhouse", token:"stripe" },
+  { name:"Figma",      ats:"greenhouse", token:"figma" },
+  { name:"Airbnb",     ats:"greenhouse", token:"airbnb" },
+  { name:"DoorDash",   ats:"greenhouse", token:"doordash" },
+  { name:"Coinbase",   ats:"greenhouse", token:"coinbase" },
+  { name:"Robinhood",  ats:"greenhouse", token:"robinhood" },
+  { name:"Databricks", ats:"greenhouse", token:"databricks" },
+  { name:"Duolingo",   ats:"greenhouse", token:"duolingo" },
+  { name:"Cloudflare", ats:"greenhouse", token:"cloudflare" },
+  { name:"GitLab",     ats:"greenhouse", token:"gitlab" },
+  { name:"Brex",       ats:"greenhouse", token:"brex" },
+  { name:"Plaid",      ats:"greenhouse", token:"plaid" },
+  { name:"Rippling",   ats:"greenhouse", token:"rippling" },
+  { name:"Perplexity", ats:"greenhouse", token:"perplexityai" },
+  { name:"Discord",    ats:"greenhouse", token:"discord" },
+  { name:"Instacart",  ats:"greenhouse", token:"instacart" },
+  { name:"Gusto",      ats:"greenhouse", token:"gusto" },
+
+  // ---- Ashby (token = the slug in jobs.ashbyhq.com/<token>; often publishes salary) ----
+  { name:"OpenAI",     ats:"ashby", token:"openai" },
+  { name:"Ramp",       ats:"ashby", token:"ramp" },
+  { name:"Notion",     ats:"ashby", token:"notion" },
+  { name:"Linear",     ats:"ashby", token:"linear" },
+  { name:"Deel",       ats:"ashby", token:"deel" },
+  { name:"Snowflake",  ats:"ashby", token:"snowflake" },
+  { name:"Shopify",    ats:"ashby", token:"Shopify" },
+  { name:"Cursor",     ats:"ashby", token:"cursor" },
+  { name:"Vanta",      ats:"ashby", token:"vanta" },
+  { name:"Retool",     ats:"ashby", token:"retool" },
+  { name:"Zapier",     ats:"ashby", token:"zapier" },
+  { name:"Mercury",    ats:"ashby", token:"mercury" },
+  { name:"Cohere",     ats:"ashby", token:"cohere" },
+  { name:"Confluent",  ats:"ashby", token:"confluent" },
+  { name:"Replit",     ats:"ashby", token:"replit" },
+  { name:"Gorgias",    ats:"ashby", token:"gorgias" },
+
+  // ---- Lever (token = slug in jobs.lever.co/<token>) ----
+  { name:"Palantir",   ats:"lever", token:"palantir" },
+
+  // ---- Workday (paste the careers URL ending in myworkdayjobs.com/…) ----
   { name:"Netflix", ats:"workday", url:"https://netflix.wd108.myworkdayjobs.com/Netflix" },
   { name:"Disney",  ats:"workday", url:"https://disney.wd5.myworkdayjobs.com/disneycareer" },
   { name:"NVIDIA",  ats:"workday", url:"https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite" },
   { name:"Adobe",   ats:"workday", url:"https://adobe.wd5.myworkdayjobs.com/external_experienced" },
 
-  // ADD FORTUNE 500 (or any company) IN ONE LINE:
-  //   Workday  -> visit their careers page, copy the URL ending in myworkdayjobs.com/…, paste it:
-  //     { name:"Salesforce", ats:"workday", url:"https://salesforce.wd12.myworkdayjobs.com/External_Career_Site" }, // VERIFY the wdNN + site
-  //   Greenhouse/Lever/Ashby/SmartRecruiters -> use the slug from their careers URL:
-  //     { name:"Studio X", ats:"greenhouse", token:"studiox" },
-  //
-  // Bethesda/ZeniMax runs a custom site (jobs.zenimax.com), not Workday — needs its own adapter (ask me to wire it).
+  // Tokens are researched but not individually test-run here. After your first daily run,
+  // check the Actions log: any company showing 0 jobs just needs its slug corrected —
+  // open that company's careers page, copy the token from the URL, and fix the line.
+  // Add any company the same way. Bethesda/ZeniMax uses a custom site (needs its own adapter).
 ];
 
 const isRemoteText = s => /(^|[^a-z])(remote|virtual|anywhere|work from home|wfh|distributed)([^a-z]|$)/i.test(s||"");
 
-function norm(c,id,title,url,remote,location,tags,description,created){
+function norm(c,id,title,url,remote,location,tags,description,created,salary){
   let iso;
   if(typeof created==="number") iso=new Date(created).toISOString();
   else { const d=new Date(created); iso=isNaN(d)?new Date().toISOString():d.toISOString(); }
   return { id:c.ats+"-"+(c.token||c.name||"co").toString().toLowerCase().replace(/\W+/g,"")+"-"+id, title:title||"", company:c.name, url:url||"",
     remote:!!remote, relocate:!remote, direct:true, location:location||"", tags:tags||[],
-    description:description||"", created:iso, salary:"", source:c.name };
+    description:description||"", created:iso, salary:salary||"", source:c.name };
 }
 
 async function greenhouse(c){
@@ -61,9 +99,9 @@ async function lever(c){
     return norm(c,x.id,x.text,x.hostedUrl,remote,loc,cat.team?[cat.team]:[],x.descriptionPlain||x.description||"",x.createdAt); });
 }
 async function ashby(c){
-  const r=await fetch(`https://api.ashbyhq.com/posting-api/job-board/${c.token}`);
+  const r=await fetch(`https://api.ashbyhq.com/posting-api/job-board/${c.token}?includeCompensation=true`);
   const j=await r.json();
-  return (j.jobs||[]).map(x=>norm(c,x.id,x.title,x.jobUrl,!!x.isRemote,x.location||"",x.departmentName?[x.departmentName]:[],x.descriptionPlain||"",x.publishedAt));
+  return (j.jobs||[]).map(x=>norm(c,x.id,x.title,x.jobUrl,!!x.isRemote,x.location||"",x.departmentName?[x.departmentName]:[],x.descriptionPlain||"",x.publishedAt, x.compensationTierSummary||(x.compensation&&x.compensation.compensationTierSummary)||""));
 }
 async function smartrecruiters(c){
   const r=await fetch(`https://api.smartrecruiters.com/v1/companies/${c.token}/postings?limit=100`);
@@ -170,6 +208,12 @@ function scoreOf(j){ const sal=salaryOf(j); let s=0;
 function keep(j){ if(!j.title||!j.company) return false; if(isJunk(j)) return false; const sal=salaryOf(j); if(sal && sal<MIN_SALARY) return false; return true; }
 function dedupe(a){ const s=new Set(),o=[]; for(const j of a){ const k=(j.company+"|"+j.title).toLowerCase().replace(/\s+/g," ").trim(); if(s.has(k))continue; s.add(k); o.push(j);} return o; }
 
+function diversify(list, perCompany, total){
+  const seen={}, out=[];
+  for(const j of list){ const k=j.source||j.company||"?"; seen[k]=(seen[k]||0)+1; if(seen[k]>perCompany) continue; out.push(j); if(out.length>=total) break; }
+  return out;
+}
+
 (async()=>{
   const [aggArr, companyArr] = await Promise.all([
     Promise.all([arbeitnow(), remotive(), jobicy()]).then(r=>[].concat(...r)),
@@ -182,15 +226,16 @@ function dedupe(a){ const s=new Set(),o=[]; for(const j of a){ const k=(j.compan
 
   let main = dedupe([].concat(aggArr, remoteCompany).filter(keep));
   main.forEach(j=>j.relocate=false);
-  main.sort((a,b)=> scoreOf(b)-scoreOf(a) || new Date(b.created)-new Date(a.created));
-  main = main.slice(0,120);
+  main.sort((a,b)=> ((b.direct?1:0)-(a.direct?1:0)) || scoreOf(b)-scoreOf(a) || new Date(b.created)-new Date(a.created));
+  main = diversify(main, 5, 130);   // at most 5 per company → wide variety
 
   let relocate = dedupe(onsite.filter(j=>!isJunk(j)));
   relocate.forEach(j=>j.relocate=true);
   relocate.sort((a,b)=> scoreOf(b)-scoreOf(a) || new Date(b.created)-new Date(a.created));
-  relocate = relocate.slice(0,60);
+  relocate = diversify(relocate, 8, 70);
 
   const outAll = main.concat(relocate);
   fs.writeFileSync("jobs.json", JSON.stringify(outAll));
-  console.log(`Wrote ${main.length} remote + ${relocate.length} relocation roles to jobs.json`);
+  const cos = new Set(outAll.map(j=>j.company)).size;
+  console.log(`Wrote ${main.length} remote + ${relocate.length} relocation roles from ${cos} companies to jobs.json`);
 })();
