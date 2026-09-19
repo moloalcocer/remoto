@@ -17,7 +17,7 @@
     mkt:["marketing","seo","content","growth","social media","copywriter","community"],
     ops:["virtual assistant","operations","project manager","admin","executive assistant","ops","coordinator","asistente"],
     data:["data","analyst","analytics","machine learning","scientist","datos"],
-    creative:["game","gamedev","video game","unity","unreal","animation","animator","3d artist","vfx","motion design","motion graphics","film","video editor","cinematograph","art director","illustrator","concept art","creative director","post-production","storyboard","character artist","game design","level design","video producer","commercial"]
+    creative:["game designer","game developer","game artist","game programmer","gameplay","gamedev","video game","gaming","unity","unreal","animator","animation","3d artist","3d modeler","3d generalist","vfx","motion designer","motion graphics","art director","concept artist","concept art","illustrator","storyboard","character artist","character designer","level designer","environment artist","video editor","video producer","cinematographer","colorist","compositor","creative director","creative producer","post-production","narrative designer","sound designer","technical artist","filmmaker"]
   };
   const LATAM=["worldwide","global","anywhere","americas","latin america","latam","south america","central america","mexico","méxico","argentina","brazil","brasil","colombia","chile","peru","spanish","bilingual","español","bilingüe","est","cst","utc-3","utc-4","utc-5","utc-6"];
   const EXCLUDE=["us only","usa only","united states only","us-only","eu only","europe only","uk only","canada only","authorized to work in the us"];
@@ -25,10 +25,10 @@
   const SENIOR=["senior","sr ","sr.","lead","staff","principal","head of","director","architect","expert","manager","chief","tech lead"];
 
   const T = {
-    en:{ apply:"Apply →", badge:"LatAm-friendly", results:n=>`${n} curated roles`, more:"Load more",
+    en:{ apply:"Apply →", applyDirect:"Apply direct →", badge:"LatAm-friendly", direct:"Direct", results:n=>`${n} curated roles`, more:"Load more",
       loading:"Loading roles…", none:"No roles match right now — check back soon.",
       err:"Couldn’t reach the job feeds. If you’re viewing this file locally, host it and it’ll fill up.", updated:t=>`updated ${t}` },
-    es:{ apply:"Postularme →", badge:"Abierta a LatAm", results:n=>`${n} vacantes seleccionadas`, more:"Ver más",
+    es:{ apply:"Postularme →", applyDirect:"Aplica directo →", badge:"Abierta a LatAm", direct:"Directo", results:n=>`${n} vacantes seleccionadas`, more:"Ver más",
       loading:"Cargando vacantes…", none:"Aún no hay vacantes que coincidan — vuelve pronto.",
       err:"No se pudo conectar con las fuentes. Si ves este archivo localmente, súbelo a un hosting y se llenará.", updated:t=>`actualizado ${t}` }
   }[N.lang] || {};
@@ -55,7 +55,8 @@
   const isJunk=j=>JUNK.some(w=>(j.title||"").toLowerCase().includes(w));
   const isSenior=j=>SENIOR.some(w=>(j.title||"").toLowerCase().includes(w));
   const latamScore=j=>{const h=(j.location+" "+j.title+" "+(j.tags||[]).join(" ")+" "+strip(j.description)).toLowerCase();if(EXCLUDE.some(s=>h.includes(s)))return -1;return LATAM.some(s=>h.includes(s))?1:0;};
-  function catMatch(j){if(N.cat==="all")return true;const m=CAT[N.cat];if(!m)return true;const h=(j.title+" "+(j.tags||[]).join(" ")).toLowerCase();return m.some(w=>h.includes(w));}
+  function wordHit(h,kw){let f=0,i;while((i=h.indexOf(kw,f))>=0){const b=i===0?" ":h[i-1],a=i+kw.length>=h.length?" ":h[i+kw.length];if(!/[a-z0-9]/.test(b)&&!/[a-z0-9]/.test(a))return true;f=i+1;}return false;}
+  function catMatch(j){if(N.cat==="all")return true;const m=CAT[N.cat];if(!m)return true;const h=(j.title+" "+(j.tags||[]).join(" ")).toLowerCase();return m.some(w=>wordHit(h,w.toLowerCase()));}
   function pass(j){if(isJunk(j))return false;if((j.title||"").length<3||(j.company||"").length<2)return false;const s=j._sal;if(s&&s<N.minSalary)return false;return true;}
   function score(j){const s=j._sal;let v=0;if(s>=N.minSalary)v+=60+Math.min(60,(s-N.minSalary)/4000);if(isSenior(j))v+=25;if(j._latam===1)v+=20;const dl=strip(j.description).length;if(dl>300)v+=8;if(dl>800)v+=6;if((j.tags||[]).length)v+=4;const days=(Date.now()-new Date(j.created))/864e5;if(days<=2)v+=10;else if(days<=7)v+=5;return v;}
 
@@ -63,11 +64,11 @@
     const box=document.getElementById("jobs"); if(!box) return;
     let jobs=ALL.slice();
     jobs.forEach(j=>{j._sal=salaryOf(j);j._latam=latamScore(j);j._score=score(j);});
-    jobs=jobs.filter(pass).filter(catMatch);
+    jobs=jobs.filter(j=>!j.relocate).filter(pass).filter(catMatch);
     if(N.latamOnly) jobs=jobs.filter(j=>j._latam===1);
     if(N.query){const q=N.query.toLowerCase();jobs=jobs.filter(j=>(j.title+" "+j.company+" "+(j.tags||[]).join(" ")).toLowerCase().includes(q));}
     const hasSal=j=>(j._sal>0?1:0);
-    jobs.sort((a,b)=>(hasSal(b)-hasSal(a))||(b._score-a._score)||(new Date(b.created)-new Date(a.created)));
+    jobs.sort((a,b)=>((b.direct?1:0)-(a.direct?1:0))||(hasSal(b)-hasSal(a))||(b._score-a._score)||(new Date(b.created)-new Date(a.created)));
     const pool=jobs.slice(0,N.maxJobs), vis=pool.slice(0,shown);
     const rc=document.getElementById("result-count"); if(rc) rc.textContent=T.results(pool.length);
     const lm=document.getElementById("load-more");
@@ -76,8 +77,9 @@
       const salTxt=j.salary||(j._sal?`$${Math.round(j._sal/1000)}k`:"");
       const sal=salTxt?`<span class="tag salary">${esc(salTxt)}</span>`:"";
       const badge=j._latam===1?`<span class="tag latam">${esc(T.badge)}</span>`:"";
+      const direct=j.direct?`<span class="tag direct">${esc(T.direct)}</span>`:"";
       const tags=(j.tags||[]).slice(0,3).map(x=>`<span class="tag">${esc(x)}</span>`).join("");
-      return `<a class="job" href="${esc(j.url)}" target="_blank" rel="noopener"><div class="logo">${esc(initials(j.company))}</div><div><h3>${esc(j.title)}</h3><div class="co">${esc(j.company)}${j.location?` · ${esc(j.location)}`:""}</div><div class="tags">${badge}${sal}${tags}</div></div><div class="side"><span class="apply">${esc(T.apply)}</span><span>${esc(ago(j.created))}</span></div></a>`;
+      return `<a class="job" href="${esc(j.url)}" target="_blank" rel="noopener"><div class="logo">${esc(initials(j.company))}</div><div><h3>${esc(j.title)}</h3><div class="co">${esc(j.company)}${j.location?` · ${esc(j.location)}`:""}</div><div class="tags">${direct}${badge}${sal}${tags}</div></div><div class="side"><span class="apply">${esc(j.direct?T.applyDirect:T.apply)}</span><span>${esc(ago(j.created))}</span></div></a>`;
     }).join("");
     if(lm) lm.style.display=pool.length>vis.length?"inline-flex":"none";
     ld(vis);
