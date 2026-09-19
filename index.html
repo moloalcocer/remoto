@@ -520,11 +520,28 @@ function wordHit(hay,kw){
   }
   return false;
 }
+/* Each role gets ONE home, decided by its title. First match in this order wins,
+   so "Game Developer" -> Engineering (programming), "Motion Designer" -> Creative, etc. */
+const CLASSIFY = [
+  ["creative", ["animator","animation","vfx","motion designer","motion graphics","3d artist","3d modeler","3d generalist","game designer","game artist","game design","art director","concept artist","concept art","illustrator","storyboard","character artist","character designer","level designer","environment artist","video editor","video producer","cinematographer","colorist","compositor","creative director","creative producer","narrative designer","sound designer","technical artist","filmmaker"]],
+  ["data", ["data scientist","data engineer","data analyst","analytics engineer","machine learning","ml engineer","ai engineer","data science","business intelligence","bi analyst","analytics"]],
+  ["eng", ["software engineer","engineer","developer","back end","backend","front end","frontend","full stack","fullstack","full-stack","devops","programmer","sre","site reliability","mobile engineer","ios","android","platform engineer","qa engineer","security engineer","game developer","game programmer","gameplay","architect","engineering manager"]],
+  ["product", ["product manager","product owner","head of product","product lead","product management","program manager","technical product manager","group product manager","director of product","vp product"]],
+  ["design", ["ux designer","ui designer","ux/ui","product designer","graphic designer","web designer","brand designer","visual designer","design lead","design director","design manager","ux researcher","user researcher","design system","designer"]],
+  ["finance", ["financial analyst","finance manager","finance","accounting","accountant","controller","fp&a","treasury","investment","tax","audit","auditor","banking","cfo","equity research","portfolio manager","underwriter","bookkeeper"]],
+  ["sales", ["account executive","business development","sales development","sdr","bdr","sales manager","sales director","head of sales","sales representative","enterprise sales","revenue","sales"]],
+  ["cs", ["customer success","customer support","customer experience","success manager","account manager","help desk","technical support","support specialist","customer care","customer service"]],
+  ["mkt", ["marketing","seo","content marketing","growth","social media","copywriter","community manager","brand manager","content strategist","demand generation","content writer","content manager"]],
+  ["ops", ["operations","project manager","executive assistant","virtual assistant","office manager","business operations","people operations","recruiter","talent acquisition","coordinator","chief of staff"]]
+];
+function primaryCategory(title){
+  const h=(title||"").toLowerCase();
+  for(const [id,kws] of CLASSIFY){ if(kws.some(k=>wordHit(h,k))) return id; }
+  return "other";
+}
 function catMatch(j,cat){
   if(cat==="all"||cat==="relocate") return true;
-  const def=CATEGORIES.find(c=>c.id===cat); if(!def||!def.match) return true;
-  const hay=(j.title+" "+(j.tags||[]).join(" ")).toLowerCase();
-  return def.match.some(m=>wordHit(hay,m.toLowerCase()));
+  return primaryCategory(j.title)===cat;
 }
 
 /* ---------- curation: pay + seniority + no junk ---------- */
