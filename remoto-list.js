@@ -56,7 +56,20 @@
   const isSenior=j=>SENIOR.some(w=>(j.title||"").toLowerCase().includes(w));
   const latamScore=j=>{const h=(j.location+" "+j.title+" "+(j.tags||[]).join(" ")+" "+strip(j.description)).toLowerCase();if(EXCLUDE.some(s=>h.includes(s)))return -1;return LATAM.some(s=>h.includes(s))?1:0;};
   function wordHit(h,kw){let f=0,i;while((i=h.indexOf(kw,f))>=0){const b=i===0?" ":h[i-1],a=i+kw.length>=h.length?" ":h[i+kw.length];if(!/[a-z0-9]/.test(b)&&!/[a-z0-9]/.test(a))return true;f=i+1;}return false;}
-  function catMatch(j){if(N.cat==="all")return true;const m=CAT[N.cat];if(!m)return true;const h=(j.title+" "+(j.tags||[]).join(" ")).toLowerCase();return m.some(w=>wordHit(h,w.toLowerCase()));}
+  const CLASSIFY=[
+    ["creative",["animator","animation","vfx","motion designer","motion graphics","3d artist","3d modeler","3d generalist","game designer","game artist","game design","art director","concept artist","concept art","illustrator","storyboard","character artist","character designer","level designer","environment artist","video editor","video producer","cinematographer","colorist","compositor","creative director","creative producer","narrative designer","sound designer","technical artist","filmmaker"]],
+    ["data",["data scientist","data engineer","data analyst","analytics engineer","machine learning","ml engineer","ai engineer","data science","business intelligence","bi analyst","analytics"]],
+    ["eng",["software engineer","engineer","developer","back end","backend","front end","frontend","full stack","fullstack","full-stack","devops","programmer","sre","site reliability","mobile engineer","ios","android","platform engineer","qa engineer","security engineer","game developer","game programmer","gameplay","architect","engineering manager"]],
+    ["product",["product manager","product owner","head of product","product lead","product management","program manager","technical product manager","group product manager","director of product","vp product"]],
+    ["design",["ux designer","ui designer","ux/ui","product designer","graphic designer","web designer","brand designer","visual designer","design lead","design director","design manager","ux researcher","user researcher","design system","designer"]],
+    ["finance",["financial analyst","finance manager","finance","accounting","accountant","controller","fp&a","treasury","investment","tax","audit","auditor","banking","cfo","equity research","portfolio manager","underwriter","bookkeeper"]],
+    ["sales",["account executive","business development","sales development","sdr","bdr","sales manager","sales director","head of sales","sales representative","enterprise sales","revenue","sales"]],
+    ["cs",["customer success","customer support","customer experience","success manager","account manager","help desk","technical support","support specialist","customer care","customer service"]],
+    ["mkt",["marketing","seo","content marketing","growth","social media","copywriter","community manager","brand manager","content strategist","demand generation","content writer","content manager"]],
+    ["ops",["operations","project manager","executive assistant","virtual assistant","office manager","business operations","people operations","recruiter","talent acquisition","coordinator","chief of staff"]]
+  ];
+  function primaryCategory(title){const h=(title||"").toLowerCase();for(const [id,kws] of CLASSIFY){if(kws.some(k=>wordHit(h,k)))return id;}return "other";}
+  function catMatch(j){if(N.cat==="all")return true;return primaryCategory(j.title)===N.cat;}
   function pass(j){if(isJunk(j))return false;if((j.title||"").length<3||(j.company||"").length<2)return false;const s=j._sal;if(s&&s<N.minSalary)return false;return true;}
   function score(j){const s=j._sal;let v=0;if(s>=N.minSalary)v+=60+Math.min(60,(s-N.minSalary)/4000);if(isSenior(j))v+=25;if(j._latam===1)v+=20;const dl=strip(j.description).length;if(dl>300)v+=8;if(dl>800)v+=6;if((j.tags||[]).length)v+=4;const days=(Date.now()-new Date(j.created))/864e5;if(days<=2)v+=10;else if(days<=7)v+=5;return v;}
 
