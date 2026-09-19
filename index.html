@@ -144,6 +144,7 @@
   .tag{font-size:12px;font-weight:600;color:var(--ink-soft);background:var(--paper-2);border:1px solid var(--line);padding:3px 9px;border-radius:7px}
   .tag.latam{color:#fff;background:var(--jade);border-color:var(--jade)}
   .tag.salary{color:var(--jade);background:var(--jade-soft);border-color:transparent}
+  .tag.direct{color:#fff;background:var(--rosa);border-color:var(--rosa)}
   .side{text-align:right;font-size:13px;color:var(--muted);white-space:nowrap;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
   .apply{font-size:13px;font-weight:700;color:var(--rosa)}
   .state{padding:60px 14px;text-align:center;color:var(--muted)}
@@ -244,6 +245,11 @@
         <span class="track"></span>
         <span data-i18n="salaried_toggle">Salary disclosed</span>
       </label>
+      <label class="switch">
+        <input type="checkbox" id="direct-only" />
+        <span class="track"></span>
+        <span data-i18n="direct_toggle">Direct apply only</span>
+      </label>
       <span id="result-count"></span>
       <span id="updated"></span>
       <button class="refresh" id="refresh" data-i18n="refresh">↻ Refresh</button>
@@ -338,6 +344,7 @@ const CONFIG = {
   MIN_SALARY:    100000,  // drop any role whose detectable pay is below this (USD/yr)
   REQUIRE_SALARY:false,   // true = ONLY show roles that openly state pay (most premium, fewest roles)
   PAGE_SIZE:     25,      // roles shown per page — a "Load more" reveals the next 25
+  DIRECT_APPLY_ONLY: false, // true = only show roles you apply to on the company's own site (no third-party job sites)
   MAX_JOBS:      100,     // absolute ceiling the board will ever show
   BLOCK:         [],      // words/companies to always exclude, e.g. ["crypto","staffing","commission"]
   PIN:           []       // words/companies to always float to the top, e.g. ["Stripe","Notion","Linear"]
@@ -355,7 +362,7 @@ const CATEGORIES = [
   { id:"mkt",     en:"Marketing",        es:"Marketing",        match:["marketing","seo","content","growth","social media","copywriter","community"] },
   { id:"ops",     en:"Ops & VA",         es:"Ops y AV",         match:["virtual assistant","operations","project manager","admin","executive assistant","ops","coordinator","asistente"] },
   { id:"data",    en:"Data",             es:"Datos",            match:["data","analyst","analytics","machine learning","ml","ai","scientist","datos"] },
-  { id:"creative",en:"Creative",         es:"Creativos",        match:["game","gamedev","video game","unity","unreal","animation","animator","3d artist","vfx","motion design","motion graphics","film","video editor","cinematograph","art director","illustrator","concept art","creative director","post-production","storyboard","character artist","game design","level design","video producer","commercial"] },
+  { id:"creative",en:"Creative",         es:"Creativos",        match:["game designer","game developer","game artist","game programmer","gameplay","gamedev","video game","gaming","unity","unreal","animator","animation","3d artist","3d modeler","3d generalist","vfx","motion designer","motion graphics","art director","concept artist","concept art","illustrator","storyboard","character artist","character designer","level designer","environment artist","video editor","video producer","cinematographer","colorist","compositor","creative director","creative producer","post-production","narrative designer","sound designer","technical artist","filmmaker"] },
   { id:"finance", en:"Finance",          es:"Finanzas",         match:["finance","financial","accounting","controller","fp&a","treasury","investment","tax","audit","banking","cfo","equity research","portfolio"] },
   { id:"product", en:"Product",          es:"Producto",         match:["product manager","product owner","head of product","product lead","program manager","technical product","product management","group product"] },
   { id:"relocate",en:"Willing to relocate?", es:"¿Dispuesto a mudarte?", match:null }
@@ -379,7 +386,7 @@ const I18N = {
     hero_sub:"A tight, curated board of high-paying remote roles open to Latin American talent. We screen out the noise — only the crème de la crème makes it in.",
     search_ph:"Search role, skill or company…", hero_cta:"Browse roles",
     hero_trust:"Free for job seekers. Every role is screened for pay and seniority — no spam, no low-ball listings.",
-    latam_toggle:"LatAm-friendly only", salaried_toggle:"Salary disclosed", refresh:"↻ Refresh", loading:"Pulling in today’s remote roles…", load_more:"Load more",
+    latam_toggle:"LatAm-friendly only", salaried_toggle:"Salary disclosed", direct_toggle:"Direct apply only", direct_badge:"Direct", apply_direct:"Apply direct →", refresh:"↻ Refresh", loading:"Pulling in today’s remote roles…", load_more:"Load more",
     emp_h2:"Hire senior talent that works your hours.",
     emp_lead:"Latin American professionals overlap the full US workday — no 2am standups. Post your remote role in front of a focused, motivated audience.",
     t1_name:"First post", t1_price:"Free", t1_per:"launch offer · 30 days", t1_a:"One live listing for 30 days", t1_b:"Prove the audience, then decide",
@@ -399,7 +406,7 @@ const I18N = {
     hero_sub:"Un tablero curado de empleos remotos bien pagados, abiertos a talento latinoamericano. Filtramos el ruido — solo la crème de la crème entra.",
     search_ph:"Busca puesto, habilidad o empresa…", hero_cta:"Ver vacantes",
     hero_trust:"Gratis para candidatos. Cada vacante se filtra por salario y seniority — sin spam, sin ofertas mediocres.",
-    latam_toggle:"Solo abiertas a LatAm", salaried_toggle:"Con salario", refresh:"↻ Actualizar", loading:"Cargando las vacantes de hoy…", load_more:"Ver más",
+    latam_toggle:"Solo abiertas a LatAm", salaried_toggle:"Con salario", direct_toggle:"Solo aplicación directa", direct_badge:"Directo", apply_direct:"Aplica directo →", refresh:"↻ Actualizar", loading:"Cargando las vacantes de hoy…", load_more:"Ver más",
     emp_h2:"Contrata talento senior en tu horario.",
     emp_lead:"Los profesionales de Latinoamérica coinciden con toda la jornada de EE. UU. Publica tu vacante remota frente a una audiencia enfocada y motivada.",
     t1_name:"Primera publicación", t1_price:"Gratis", t1_per:"oferta de lanzamiento · 30 días", t1_a:"Una vacante activa por 30 días", t1_b:"Comprueba la audiencia y decide",
@@ -421,6 +428,7 @@ let ALL_JOBS = [];
 let activeCat = "all";
 let latamOnly = false;
 let salariedOnly = false;
+let directOnly = false;
 let shown = CONFIG.PAGE_SIZE;
 let query = "";
 const t = (k) => I18N[LANG][k];
@@ -503,11 +511,20 @@ function latamScore(j){
   if(EXCLUDE_SIGNALS.some(s=>hay.includes(s))) return -1;
   return LATAM_SIGNALS.some(s=>hay.includes(s)) ? 1 : 0;
 }
+function wordHit(hay,kw){
+  let from=0,idx;
+  while((idx=hay.indexOf(kw,from))>=0){
+    const b=idx===0?" ":hay[idx-1], a=idx+kw.length>=hay.length?" ":hay[idx+kw.length];
+    if(!/[a-z0-9]/.test(b) && !/[a-z0-9]/.test(a)) return true;
+    from=idx+1;
+  }
+  return false;
+}
 function catMatch(j,cat){
-  if(cat==="all") return true;
+  if(cat==="all"||cat==="relocate") return true;
   const def=CATEGORIES.find(c=>c.id===cat); if(!def||!def.match) return true;
   const hay=(j.title+" "+(j.tags||[]).join(" ")).toLowerCase();
-  return def.match.some(m=>hay.includes(m));
+  return def.match.some(m=>wordHit(hay,m.toLowerCase()));
 }
 
 /* ---------- curation: pay + seniority + no junk ---------- */
@@ -565,9 +582,10 @@ function render(){
     jobs=jobs.filter(j=>catMatch(j,activeCat));
     if(query){ const q=query.toLowerCase(); jobs=jobs.filter(j=>(j.title+" "+j.company+" "+(j.tags||[]).join(" ")).toLowerCase().includes(q)); }
   }
-  // order: editorial pins → salary-disclosed → best score → newest
+  if(directOnly||CONFIG.DIRECT_APPLY_ONLY) jobs=jobs.filter(j=>j.direct);
+  // order: editorial pins → direct-apply → salary-disclosed → best score → newest
   const hasSal = j => (j._sal>0?1:0);
-  jobs.sort((a,b)=> (b._pin-a._pin) || (hasSal(b)-hasSal(a)) || (b._score-a._score) || (new Date(b.created)-new Date(a.created)));
+  jobs.sort((a,b)=> (b._pin-a._pin) || ((b.direct?1:0)-(a.direct?1:0)) || (hasSal(b)-hasSal(a)) || (b._score-a._score) || (new Date(b.created)-new Date(a.created)));
   const pool = jobs.slice(0, CONFIG.MAX_JOBS);   // overall ceiling
   const visible = pool.slice(0, shown);          // current page window (25 at a time)
 
@@ -587,14 +605,16 @@ function render(){
     const salTxt = j.salary || (j._sal ? `$${Math.round(j._sal/1000)}k` : "");
     const sal = salTxt?`<span class="tag salary">${esc(salTxt)}</span>`:"";
     const badge = friendly?`<span class="tag latam">${esc(t("latam_badge"))}</span>`:"";
+    const direct = j.direct?`<span class="tag direct">${esc(t("direct_badge"))}</span>`:"";
+    const applyTxt = j.direct?t("apply_direct"):t("apply");
     return `<a class="job" href="${esc(j.url)}" target="_blank" rel="noopener">
       <div class="logo">${esc(initials(j.company))}</div>
       <div>
         <h3>${esc(j.title)}</h3>
         <div class="co">${esc(j.company)}${j.location?` · ${esc(j.location)}`:""}</div>
-        <div class="tags">${badge}${sal}${tags}</div>
+        <div class="tags">${direct}${badge}${sal}${tags}</div>
       </div>
-      <div class="side"><span class="apply">${esc(t("apply"))}</span><span>${esc(timeAgo(j.created))}</span></div>
+      <div class="side"><span class="apply">${esc(applyTxt)}</span><span>${esc(timeAgo(j.created))}</span></div>
     </a>`;
   }).join("");
 
@@ -665,6 +685,7 @@ document.querySelectorAll(".langtog button").forEach(b=>b.onclick=()=>{ LANG=b.d
 document.getElementById("hero-search").addEventListener("input",e=>{ query=e.target.value; shown=CONFIG.PAGE_SIZE; if(ALL_JOBS.length) render(); });
 document.getElementById("latam-only").addEventListener("change",e=>{ latamOnly=e.target.checked; shown=CONFIG.PAGE_SIZE; render(); });
 document.getElementById("salaried-only").addEventListener("change",e=>{ salariedOnly=e.target.checked; shown=CONFIG.PAGE_SIZE; render(); });
+document.getElementById("direct-only").addEventListener("change",e=>{ directOnly=e.target.checked; shown=CONFIG.PAGE_SIZE; render(); });
 document.getElementById("load-more").addEventListener("click",()=>{ shown+=CONFIG.PAGE_SIZE; render(); });
 document.getElementById("refresh").addEventListener("click",load);
 
