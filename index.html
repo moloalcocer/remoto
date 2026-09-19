@@ -250,6 +250,11 @@
         <span class="track"></span>
         <span data-i18n="direct_toggle">Direct apply only</span>
       </label>
+      <label class="switch">
+        <input type="checkbox" id="relocate-on" />
+        <span class="track"></span>
+        <span data-i18n="relocate_toggle">Willing to relocate?</span>
+      </label>
       <span id="result-count"></span>
       <span id="updated"></span>
       <button class="refresh" id="refresh" data-i18n="refresh">↻ Refresh</button>
@@ -364,8 +369,7 @@ const CATEGORIES = [
   { id:"data",    en:"Data",             es:"Datos",            match:["data","analyst","analytics","machine learning","ml","ai","scientist","datos"] },
   { id:"creative",en:"Creative",         es:"Creativos",        match:["game designer","game developer","game artist","game programmer","gameplay","gamedev","video game","gaming","unity","unreal","animator","animation","3d artist","3d modeler","3d generalist","vfx","motion designer","motion graphics","art director","concept artist","concept art","illustrator","storyboard","character artist","character designer","level designer","environment artist","video editor","video producer","cinematographer","colorist","compositor","creative director","creative producer","post-production","narrative designer","sound designer","technical artist","filmmaker"] },
   { id:"finance", en:"Finance",          es:"Finanzas",         match:["finance","financial","accounting","controller","fp&a","treasury","investment","tax","audit","banking","cfo","equity research","portfolio"] },
-  { id:"product", en:"Product",          es:"Producto",         match:["product manager","product owner","head of product","product lead","program manager","technical product","product management","group product"] },
-  { id:"relocate",en:"Willing to relocate?", es:"¿Dispuesto a mudarte?", match:null }
+  { id:"product", en:"Product",          es:"Producto",         match:["product manager","product owner","head of product","product lead","program manager","technical product","product management","group product"] }
 ];
 
 /* Signals that a remote role is open to LatAm / the Americas / bilingual talent. */
@@ -386,7 +390,7 @@ const I18N = {
     hero_sub:"A tight, curated board of high-paying remote roles open to Latin American talent. We screen out the noise — only the crème de la crème makes it in.",
     search_ph:"Search role, skill or company…", hero_cta:"Browse roles",
     hero_trust:"Free for job seekers. Every role is screened for pay and seniority — no spam, no low-ball listings.",
-    latam_toggle:"LatAm-friendly only", salaried_toggle:"Salary disclosed", direct_toggle:"Direct apply only", direct_badge:"Direct", apply_direct:"Apply direct →", refresh:"↻ Refresh", loading:"Pulling in today’s remote roles…", load_more:"Load more",
+    latam_toggle:"LatAm-friendly only", salaried_toggle:"Salary disclosed", direct_toggle:"Direct apply only", relocate_toggle:"Willing to relocate?", direct_badge:"Direct", apply_direct:"Apply direct →", refresh:"↻ Refresh", loading:"Pulling in today’s remote roles…", load_more:"Load more",
     emp_h2:"Hire senior talent that works your hours.",
     emp_lead:"Latin American professionals overlap the full US workday — no 2am standups. Post your remote role in front of a focused, motivated audience.",
     t1_name:"First post", t1_price:"Free", t1_per:"launch offer · 30 days", t1_a:"One live listing for 30 days", t1_b:"Prove the audience, then decide",
@@ -406,7 +410,7 @@ const I18N = {
     hero_sub:"Un tablero curado de empleos remotos bien pagados, abiertos a talento latinoamericano. Filtramos el ruido — solo la crème de la crème entra.",
     search_ph:"Busca puesto, habilidad o empresa…", hero_cta:"Ver vacantes",
     hero_trust:"Gratis para candidatos. Cada vacante se filtra por salario y seniority — sin spam, sin ofertas mediocres.",
-    latam_toggle:"Solo abiertas a LatAm", salaried_toggle:"Con salario", direct_toggle:"Solo aplicación directa", direct_badge:"Directo", apply_direct:"Aplica directo →", refresh:"↻ Actualizar", loading:"Cargando las vacantes de hoy…", load_more:"Ver más",
+    latam_toggle:"Solo abiertas a LatAm", salaried_toggle:"Con salario", direct_toggle:"Solo aplicación directa", relocate_toggle:"¿Dispuesto a mudarte?", direct_badge:"Directo", apply_direct:"Aplica directo →", refresh:"↻ Actualizar", loading:"Cargando las vacantes de hoy…", load_more:"Ver más",
     emp_h2:"Contrata talento senior en tu horario.",
     emp_lead:"Los profesionales de Latinoamérica coinciden con toda la jornada de EE. UU. Publica tu vacante remota frente a una audiencia enfocada y motivada.",
     t1_name:"Primera publicación", t1_price:"Gratis", t1_per:"oferta de lanzamiento · 30 días", t1_a:"Una vacante activa por 30 días", t1_b:"Comprueba la audiencia y decide",
@@ -429,6 +433,7 @@ let activeCat = "all";
 let latamOnly = false;
 let salariedOnly = false;
 let directOnly = false;
+let relocateOn = false;
 let shown = CONFIG.PAGE_SIZE;
 let query = "";
 const t = (k) => I18N[LANG][k];
@@ -587,14 +592,14 @@ function render(){
   const list=document.getElementById("job-list");
   let jobs=ALL_JOBS.slice();
   jobs.forEach(j=>{ j._latam=latamScore(j); j._sal=parseSalary(j); j._pin=isPinned(j)?1:0; j._score=qualityScore(j); });
-  const relocateView = (activeCat==="relocate");
-  if(relocateView){
-    jobs=jobs.filter(j=>j.relocate && !isJunk(j));       // prestige onsite roles for people open to moving
+  if(relocateOn){
+    jobs=jobs.filter(j=>j.relocate && !isJunk(j));   // relocation/onsite roles…
+    jobs=jobs.filter(j=>catMatch(j,activeCat));       // …narrowed by the selected role type
     if(salariedOnly) jobs=jobs.filter(j=>j._sal>0);
     if(query){ const q=query.toLowerCase(); jobs=jobs.filter(j=>(j.title+" "+j.company+" "+(j.tags||[]).join(" ")).toLowerCase().includes(q)); }
   }else{
-    jobs=jobs.filter(j=>!j.relocate);                    // main board stays remote-only
-    jobs=jobs.filter(passesCuration);                    // curation gate: high pay / senior / no junk
+    jobs=jobs.filter(j=>!j.relocate);                 // main board stays remote-only
+    jobs=jobs.filter(passesCuration);                 // curation gate: high pay / senior / no junk
     if(latamOnly) jobs=jobs.filter(j=>j._latam===1);
     jobs=jobs.filter(j=>catMatch(j,activeCat));
     if(query){ const q=query.toLowerCase(); jobs=jobs.filter(j=>(j.title+" "+j.company+" "+(j.tags||[]).join(" ")).toLowerCase().includes(q)); }
@@ -703,6 +708,7 @@ document.getElementById("hero-search").addEventListener("input",e=>{ query=e.tar
 document.getElementById("latam-only").addEventListener("change",e=>{ latamOnly=e.target.checked; shown=CONFIG.PAGE_SIZE; render(); });
 document.getElementById("salaried-only").addEventListener("change",e=>{ salariedOnly=e.target.checked; shown=CONFIG.PAGE_SIZE; render(); });
 document.getElementById("direct-only").addEventListener("change",e=>{ directOnly=e.target.checked; shown=CONFIG.PAGE_SIZE; render(); });
+document.getElementById("relocate-on").addEventListener("change",e=>{ relocateOn=e.target.checked; shown=CONFIG.PAGE_SIZE; render(); });
 document.getElementById("load-more").addEventListener("click",()=>{ shown+=CONFIG.PAGE_SIZE; render(); });
 document.getElementById("refresh").addEventListener("click",load);
 
