@@ -33,6 +33,7 @@ main{padding:6px 0 30px;min-height:36vh}
 .tag{font-size:12px;font-weight:600;color:var(--ink-soft);background:var(--paper-2);border:1px solid var(--line);padding:3px 9px;border-radius:7px}
 .tag.latam{color:#fff;background:var(--jade);border-color:var(--jade)}
 .tag.salary{color:var(--jade);background:var(--jade-soft);border-color:transparent}
+.tag.direct{color:#fff;background:var(--rosa);border-color:var(--rosa)}
 .side{text-align:right;font-size:13px;color:var(--muted);white-space:nowrap;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
 .apply{font-size:13px;font-weight:700;color:var(--rosa)}
 .state{padding:54px 14px;text-align:center;color:var(--muted)}
