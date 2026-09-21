@@ -25,6 +25,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 
 <!-- ============ Site-level structured data ============ -->
 <script type="application/ld+json">
@@ -137,7 +139,8 @@
   main{padding:8px 0 40px; min-height:40vh}
   .job{display:grid; grid-template-columns:52px 1fr auto; gap:16px; align-items:start; padding:20px 14px; border-bottom:1px solid var(--line); text-decoration:none; color:inherit; transition:background .12s}
   .job:hover{background:var(--paper-2)}
-  .logo{width:52px;height:52px;border-radius:12px;background:var(--paper-2);border:1px solid var(--line);display:grid;place-items:center;font-family:"Bricolage Grotesque";font-weight:800;font-size:22px;color:var(--ink)}
+  .logo{width:52px;height:52px;border-radius:12px;background:var(--paper-2);border:1px solid var(--line);display:grid;place-items:center;font-family:"Bricolage Grotesque";font-weight:800;font-size:22px;color:var(--ink);position:relative;overflow:hidden}
+  .logo img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff;border-radius:inherit}
   .job h3{font-size:19px;font-weight:700;letter-spacing:-.01em}
   .co{font-size:14.5px;color:var(--ink-soft);margin-top:2px;font-weight:600}
   .tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
@@ -201,6 +204,24 @@
   footer a:hover{color:var(--rosa)}
   .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(120%);background:var(--ink);color:var(--paper);padding:13px 22px;border-radius:999px;font-size:14px;font-weight:600;transition:transform .3s cubic-bezier(.2,.9,.3,1);z-index:99}
   .toast.show{transform:translateX(-50%) translateY(0)}
+  .tag.match{color:#fff;border-color:transparent}
+  .tag.match.hi{background:var(--jade)} .tag.match.mid{background:#b58900} .tag.match.lo{background:#9aa2b1}
+  .cvbar{border-bottom:1px solid var(--line);background:var(--paper-2)}
+  .cvbar-in{display:flex;align-items:center;gap:20px;justify-content:space-between;padding:20px 0;flex-wrap:wrap}
+  .cvbar-copy strong{display:block;font-family:"Bricolage Grotesque";font-weight:800;font-size:19px}
+  .cvbar-copy span{font-size:14px;color:var(--ink-soft);max-width:60ch;display:block;margin-top:3px}
+  .cv-upload{cursor:pointer}
+  .cv-panel{display:flex;align-items:flex-start;gap:24px;flex-wrap:wrap;padding:20px 0 24px;border-top:1px solid var(--line)}
+  .cv-score{display:flex;align-items:center;gap:14px}
+  .cv-ring{--v:0;width:74px;height:74px;border-radius:50%;background:conic-gradient(var(--jade) calc(var(--v)*3.6deg), var(--line) 0);display:grid;place-items:center;flex:none;position:relative}
+  .cv-ring::before{content:"";position:absolute;width:56px;height:56px;border-radius:50%;background:var(--paper-2)}
+  .cv-ring span{position:relative;font-family:"Bricolage Grotesque";font-weight:800;font-size:22px}
+  .cv-scap{font-size:13.5px;color:var(--ink-soft);max-width:34ch;margin-top:2px}
+  .cv-tips{flex:1;min-width:240px;font-size:13.5px;color:var(--ink-soft)}
+  .cv-tips ul{margin:0;padding-left:18px} .cv-tips li{margin:3px 0}
+  .cv-skills{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-start;max-width:100%}
+  .cv-skills .tag{background:var(--jade-soft);color:var(--jade);border-color:transparent}
+  .cv-clear{background:none;border:0;color:var(--muted);font:inherit;font-size:13px;cursor:pointer;text-decoration:underline}
 </style>
 </head>
 <body>
@@ -231,6 +252,32 @@
   </div>
 </section>
 
+<section class="cvbar">
+  <div class="wrap">
+    <div class="cvbar-in">
+      <div class="cvbar-copy">
+        <strong data-i18n="cv_h">Match jobs to your CV</strong>
+        <span data-i18n="cv_sub">Upload your CV — we’ll score it for ATS-readiness and rank every role by how well it fits. It never leaves your device.</span>
+      </div>
+      <label class="btn btn-primary cv-upload">
+        <input type="file" id="cv-file" accept=".pdf,.txt,.docx" hidden>
+        <span id="cv-btn-label" data-i18n="cv_btn">Upload CV</span>
+      </label>
+    </div>
+    <div class="cv-panel" id="cv-panel" hidden>
+      <div class="cv-score">
+        <div class="cv-ring" id="cv-ring"><span id="cv-num">–</span></div>
+        <div><strong data-i18n="cv_ats">ATS-readiness</strong><div class="cv-scap" id="cv-scap"></div></div>
+      </div>
+      <div class="cv-tips" id="cv-tips"></div>
+      <div style="flex-basis:100%;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+        <div class="cv-skills" id="cv-skills"></div>
+        <button class="cv-clear" id="cv-clear" data-i18n="cv_clear">Remove CV</button>
+      </div>
+    </div>
+  </div>
+</section>
+
 <div class="controls" id="jobs">
   <div class="wrap">
     <div class="chips" id="chips"></div>
@@ -254,6 +301,11 @@
         <input type="checkbox" id="relocate-on" />
         <span class="track"></span>
         <span data-i18n="relocate_toggle">Willing to relocate?</span>
+      </label>
+      <label class="switch" id="match-wrap" style="display:none">
+        <input type="checkbox" id="match-sort" />
+        <span class="track"></span>
+        <span data-i18n="match_toggle">Best matches for me</span>
       </label>
       <span id="result-count"></span>
       <span id="updated"></span>
@@ -390,7 +442,7 @@ const I18N = {
     hero_sub:"A tight, curated board of high-paying remote roles open to Latin American talent. We screen out the noise — only the crème de la crème makes it in.",
     search_ph:"Search role, skill or company…", hero_cta:"Browse roles",
     hero_trust:"Free for job seekers. Every role is screened for pay and seniority — no spam, no low-ball listings.",
-    latam_toggle:"LatAm-friendly only", salaried_toggle:"Salary disclosed", direct_toggle:"Direct apply only", relocate_toggle:"Willing to relocate?", direct_badge:"Direct", apply_direct:"Apply direct →", refresh:"↻ Refresh", loading:"Pulling in today’s remote roles…", load_more:"Load more",
+    latam_toggle:"LatAm-friendly only", salaried_toggle:"Salary disclosed", direct_toggle:"Direct apply only", relocate_toggle:"Willing to relocate?", direct_badge:"Direct", apply_direct:"Apply direct →", refresh:"↻ Refresh", loading:"Pulling in today’s remote roles…", load_more:"Load more", match_toggle:"Best matches for me", cv_h:"Match jobs to your CV", cv_sub:"Upload your CV — we’ll score it for ATS-readiness and rank every role by how well it fits. It never leaves your device.", cv_btn:"Upload CV", cv_ats:"ATS-readiness", cv_clear:"Remove CV",
     emp_h2:"Hire senior talent that works your hours.",
     emp_lead:"Latin American professionals overlap the full US workday — no 2am standups. Post your remote role in front of a focused, motivated audience.",
     t1_name:"First post", t1_price:"Free", t1_per:"launch offer · 30 days", t1_a:"One live listing for 30 days", t1_b:"Prove the audience, then decide",
@@ -410,7 +462,7 @@ const I18N = {
     hero_sub:"Un tablero curado de empleos remotos bien pagados, abiertos a talento latinoamericano. Filtramos el ruido — solo la crème de la crème entra.",
     search_ph:"Busca puesto, habilidad o empresa…", hero_cta:"Ver vacantes",
     hero_trust:"Gratis para candidatos. Cada vacante se filtra por salario y seniority — sin spam, sin ofertas mediocres.",
-    latam_toggle:"Solo abiertas a LatAm", salaried_toggle:"Con salario", direct_toggle:"Solo aplicación directa", relocate_toggle:"¿Dispuesto a mudarte?", direct_badge:"Directo", apply_direct:"Aplica directo →", refresh:"↻ Actualizar", loading:"Cargando las vacantes de hoy…", load_more:"Ver más",
+    latam_toggle:"Solo abiertas a LatAm", salaried_toggle:"Con salario", direct_toggle:"Solo aplicación directa", relocate_toggle:"¿Dispuesto a mudarte?", direct_badge:"Directo", apply_direct:"Aplica directo →", refresh:"↻ Actualizar", loading:"Cargando las vacantes de hoy…", load_more:"Ver más", match_toggle:"Mejores para mí", cv_h:"Empareja empleos con tu CV", cv_sub:"Sube tu CV — lo evaluamos para compatibilidad ATS y ordenamos cada vacante según qué tan bien encaja. Nunca sale de tu dispositivo.", cv_btn:"Subir CV", cv_ats:"Compatibilidad ATS", cv_clear:"Quitar CV",
     emp_h2:"Contrata talento senior en tu horario.",
     emp_lead:"Los profesionales de Latinoamérica coinciden con toda la jornada de EE. UU. Publica tu vacante remota frente a una audiencia enfocada y motivada.",
     t1_name:"Primera publicación", t1_price:"Gratis", t1_per:"oferta de lanzamiento · 30 días", t1_a:"Una vacante activa por 30 días", t1_b:"Comprueba la audiencia y decide",
@@ -434,6 +486,7 @@ let latamOnly = false;
 let salariedOnly = false;
 let directOnly = false;
 let relocateOn = false;
+let cvText = ""; let cvSkills = new Set(); let cvLoaded = false; let matchSort = false;
 let shown = CONFIG.PAGE_SIZE;
 let query = "";
 const t = (k) => I18N[LANG][k];
@@ -591,7 +644,7 @@ function qualityScore(job){
 function render(){
   const list=document.getElementById("job-list");
   let jobs=ALL_JOBS.slice();
-  jobs.forEach(j=>{ j._latam=latamScore(j); j._sal=parseSalary(j); j._pin=isPinned(j)?1:0; j._score=qualityScore(j); });
+  jobs.forEach(j=>{ j._latam=latamScore(j); j._sal=parseSalary(j); j._pin=isPinned(j)?1:0; j._score=qualityScore(j); if(cvLoaded) j._match=jobMatchPct(j); });
   if(relocateOn){
     jobs=jobs.filter(j=>j.relocate && !isJunk(j));   // relocation/onsite roles…
     jobs=jobs.filter(j=>catMatch(j,activeCat));       // …narrowed by the selected role type
@@ -607,7 +660,8 @@ function render(){
   if(directOnly||CONFIG.DIRECT_APPLY_ONLY) jobs=jobs.filter(j=>j.direct);
   // order: editorial pins → direct-apply → salary-disclosed → best score → newest
   const hasSal = j => (j._sal>0?1:0);
-  jobs.sort((a,b)=> (b._pin-a._pin) || ((b.direct?1:0)-(a.direct?1:0)) || (hasSal(b)-hasSal(a)) || (b._score-a._score) || (new Date(b.created)-new Date(a.created)));
+  if(cvLoaded && matchSort) jobs.sort((a,b)=> (b._match-a._match) || (b._score-a._score) || (new Date(b.created)-new Date(a.created)));
+  else jobs.sort((a,b)=> (b._pin-a._pin) || ((b.direct?1:0)-(a.direct?1:0)) || (hasSal(b)-hasSal(a)) || (b._score-a._score) || (new Date(b.created)-new Date(a.created)));
   const pool = jobs.slice(0, CONFIG.MAX_JOBS);   // overall ceiling
   const visible = pool.slice(0, shown);          // current page window (25 at a time)
 
@@ -628,13 +682,14 @@ function render(){
     const sal = salTxt?`<span class="tag salary">${esc(salTxt)}</span>`:"";
     const badge = friendly?`<span class="tag latam">${esc(t("latam_badge"))}</span>`:"";
     const direct = j.direct?`<span class="tag direct">${esc(t("direct_badge"))}</span>`:"";
+    const match = cvLoaded?`<span class="tag match ${j._match>=70?'hi':j._match>=40?'mid':'lo'}">${j._match}% ${LANG==="es"?"afín":"match"}</span>`:"";
     const applyTxt = j.direct?t("apply_direct"):t("apply");
     return `<a class="job" href="${esc(j.url)}" target="_blank" rel="noopener">
-      <div class="logo">${esc(initials(j.company))}</div>
+      <div class="logo">${esc(initials(j.company))}${j.domain?`<img src="https://logo.clearbit.com/${esc(j.domain)}" alt="" loading="lazy" onerror="if(!this.dataset.f){this.dataset.f='1';this.src='https://www.google.com/s2/favicons?domain=${esc(j.domain)}&sz=64'}else{this.style.display='none'}">`:""}</div>
       <div>
         <h3>${esc(j.title)}</h3>
         <div class="co">${esc(j.company)}${j.location?` · ${esc(j.location)}`:""}</div>
-        <div class="tags">${direct}${badge}${sal}${tags}</div>
+        <div class="tags">${match}${direct}${badge}${sal}${tags}</div>
       </div>
       <div class="side"><span class="apply">${esc(applyTxt)}</span><span>${esc(timeAgo(j.created))}</span></div>
     </a>`;
@@ -739,6 +794,88 @@ document.getElementById("alert-form").addEventListener("submit",async e=>{
 });
 
 /* init */
+/* ================= CV matching + ATS score (100% in-browser, nothing uploaded) ================= */
+if(window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+const SKILLS=["javascript","typescript","python","java","c++","c#","go","golang","rust","ruby","php","swift","kotlin","scala","sql","nosql","react","angular","vue","node.js","node","django","flask","spring",".net","rails","graphql","rest","html","css","tailwind","redux","next.js",
+"aws","azure","google cloud","gcp","docker","kubernetes","terraform","jenkins","ci/cd","ansible","linux","git","github","gitlab",
+"machine learning","deep learning","tensorflow","pytorch","pandas","numpy","scikit-learn","spark","hadoop","tableau","power bi","data analysis","statistics","a/b testing","etl","snowflake","databricks","nlp","computer vision","llm",
+"figma","sketch","adobe xd","photoshop","illustrator","indesign","after effects","premiere pro","ux","ui","wireframing","prototyping","design systems","typography","branding","user research",
+"unreal engine","unreal","unity","maya","blender","zbrush","3ds max","cinema 4d","houdini","nuke","substance painter","substance designer","motion graphics","animation","rigging","character animation","vfx","compositing","concept art","storyboarding","level design","game design","modeling","texturing","davinci resolve","pro tools","sound design","cinematography","color grading",
+"seo","sem","google analytics","google ads","hubspot","marketo","content marketing","copywriting","social media","email marketing","growth marketing","brand strategy",
+"salesforce","crm","account management","customer success","negotiation","lead generation","zendesk",
+"excel","financial modeling","forecasting","budgeting","quickbooks","sap","financial analysis","accounting","gaap","fp&a","valuation","bloomberg",
+"jira","confluence","agile","scrum","kanban","product management","roadmap","project management","stakeholder management","asana","notion",
+"leadership","communication","team management","mentoring","problem solving"];
+
+async function readCV(file){
+  const name=(file.name||"").toLowerCase();
+  if(name.endsWith(".pdf") && window.pdfjsLib){
+    const buf=await file.arrayBuffer(); const pdf=await pdfjsLib.getDocument({data:buf}).promise; let txt="";
+    for(let p=1;p<=pdf.numPages;p++){ const pg=await pdf.getPage(p); const c=await pg.getTextContent(); txt+=" "+c.items.map(i=>i.str).join(" "); }
+    return txt;
+  }
+  if(name.endsWith(".docx") && window.mammoth){ const buf=await file.arrayBuffer(); const r=await mammoth.extractRawText({arrayBuffer:buf}); return r.value||""; }
+  return await file.text();
+}
+function extractSkills(text){ const h=(text||"").toLowerCase(); return SKILLS.filter(s=>wordHit(h,s)); }
+function jobMatchPct(job){
+  const h=(job.title+" "+(job.tags||[]).join(" ")+" "+stripHtml(job.description||"")).toLowerCase();
+  const need=SKILLS.filter(s=>wordHit(h,s));
+  if(need.length>=3){ const hit=need.filter(s=>cvSkills.has(s)).length; return Math.round(hit/need.length*100); }
+  const tw=[...new Set(job.title.toLowerCase().split(/[^a-z0-9]+/).filter(w=>w.length>3))];
+  if(!tw.length) return 0;
+  const hit=tw.filter(w=>cvText.includes(w)).length; return Math.round(hit/tw.length*100);
+}
+function atsScore(text){
+  const t=(text||"").toLowerCase(); const words=t.split(/\s+/).filter(Boolean).length; let s=0; const tips=[]; const es=LANG==="es";
+  if(words>150) s+=18; else tips.push(es?"Poco texto legible — usa un PDF de texto (evita imágenes o columnas complejas).":"Very little readable text — use a text-based PDF (avoid image/complex columns).");
+  if(/[\w.+-]+@[\w-]+\.[\w.-]+/.test(t)) s+=10; else tips.push(es?"Agrega un correo de contacto.":"Add a contact email.");
+  if(/\+?\d[\d\s().-]{7,}/.test(t)) s+=6; else tips.push(es?"Agrega un teléfono.":"Add a phone number.");
+  if(/\b(experience|work history|employment|experiencia|empleo)\b/.test(t)) s+=12; else tips.push(es?"Incluye una sección de Experiencia clara.":"Add a clear Experience section.");
+  if(/\b(education|educaci)\b/.test(t)) s+=8; else tips.push(es?"Incluye tu Educación.":"Add an Education section.");
+  if(/\b(skills|habilidades|competenc)\b/.test(t)) s+=10; else tips.push(es?"Agrega una sección de Habilidades con las herramientas del puesto que buscas.":"Add a Skills section with the tools/keywords from your target roles.");
+  if(/\d+%|\$\s?\d|\d{2,}/.test(t)) s+=10; else tips.push(es?"Cuantifica logros con números (%, $, cantidades).":"Quantify achievements with numbers (%, $, counts).");
+  const verbs=["led","built","managed","designed","launched","increased","reduced","created","developed","delivered","shipped","drove","lideré","dirigí","construí","diseñé","lancé"];
+  if(verbs.some(v=>wordHit(t,v))) s+=8; else tips.push(es?"Empieza tus viñetas con verbos de acción (lideré, construí, lancé…).":"Start bullets with strong action verbs (led, built, launched…).");
+  if(/(^|\n)\s*[•\-\*]/m.test(text)) s+=6;
+  const sk=extractSkills(text).length;
+  if(sk>=8) s+=12; else if(sk>=4) s+=6; else tips.push(es?"Nombra más herramientas/habilidades concretas de tu área.":"Name more concrete skills/tools relevant to your field.");
+  if(words>=250 && words<=1200) s+=5; else if(words>1200) tips.push(es?"Considera acortarlo — un CV muy largo diluye las palabras clave.":"Consider trimming — very long CVs dilute keyword focus.");
+  return {score:Math.max(0,Math.min(100,Math.round(s))), tips:tips.slice(0,4)};
+}
+function showCV(text){
+  const low=(text||"").toLowerCase(); cvText=low; const sk=extractSkills(low); cvSkills=new Set(sk); cvLoaded=true;
+  const {score,tips}=atsScore(text); const es=LANG==="es";
+  document.getElementById("cv-panel").hidden=false;
+  document.getElementById("cv-num").textContent=score;
+  document.getElementById("cv-ring").style.setProperty("--v",score);
+  document.getElementById("cv-scap").textContent = score>=75?(es?"Sólido — probablemente pase los filtros ATS.":"Strong — likely to pass ATS screens."):score>=50?(es?"Aceptable — unos ajustes ayudarán.":"Decent — a few fixes will help."):(es?"Necesita trabajo para pasar filtros ATS.":"Needs work to pass ATS filters.");
+  document.getElementById("cv-tips").innerHTML = tips.length?("<ul>"+tips.map(x=>`<li>${esc(x)}</li>`).join("")+"</ul>"):"";
+  document.getElementById("cv-skills").innerHTML = sk.slice(0,16).map(x=>`<span class="tag">${esc(x)}</span>`).join("");
+  document.getElementById("cv-btn-label").textContent = es?"Cambiar CV":"Change CV";
+  document.getElementById("match-wrap").style.display="";
+  shown=CONFIG.PAGE_SIZE; render();
+}
+function clearCV(){
+  cvText=""; cvSkills=new Set(); cvLoaded=false; matchSort=false;
+  document.getElementById("cv-panel").hidden=true;
+  document.getElementById("match-wrap").style.display="none";
+  document.getElementById("match-sort").checked=false;
+  document.getElementById("cv-btn-label").textContent=t("cv_btn");
+  document.getElementById("cv-file").value=""; shown=CONFIG.PAGE_SIZE; render();
+}
+document.getElementById("cv-file").addEventListener("change",async e=>{
+  const f=e.target.files&&e.target.files[0]; if(!f) return; const es=LANG==="es";
+  const lbl=document.getElementById("cv-btn-label"); lbl.textContent=es?"Leyendo…":"Reading…";
+  try{
+    const txt=await readCV(f);
+    if(!txt || txt.trim().length<20){ toast(es?"No se pudo leer el archivo — prueba un PDF de texto.":"Couldn’t read that file — try a text PDF."); lbl.textContent=t("cv_btn"); return; }
+    showCV(txt);
+  }catch(err){ toast(es?"No se pudo procesar el archivo.":"Couldn’t process that file."); lbl.textContent=t("cv_btn"); }
+});
+document.getElementById("cv-clear").addEventListener("click",clearCV);
+document.getElementById("match-sort").addEventListener("change",e=>{ matchSort=e.target.checked; shown=CONFIG.PAGE_SIZE; render(); });
+
 document.getElementById("year").textContent=new Date().getFullYear();
 document.title = `${CONFIG.BOARD_NAME} — ${LANG==="es"?"Empleos remotos para talento latinoamericano":"Remote jobs for top Latin American talent"}`;
 applyLang();
