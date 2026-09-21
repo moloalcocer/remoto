@@ -92,7 +92,7 @@
       const badge=j._latam===1?`<span class="tag latam">${esc(T.badge)}</span>`:"";
       const direct=j.direct?`<span class="tag direct">${esc(T.direct)}</span>`:"";
       const tags=(j.tags||[]).slice(0,3).map(x=>`<span class="tag">${esc(x)}</span>`).join("");
-      return `<a class="job" href="${esc(j.url)}" target="_blank" rel="noopener"><div class="logo">${esc(initials(j.company))}</div><div><h3>${esc(j.title)}</h3><div class="co">${esc(j.company)}${j.location?` · ${esc(j.location)}`:""}</div><div class="tags">${direct}${badge}${sal}${tags}</div></div><div class="side"><span class="apply">${esc(j.direct?T.applyDirect:T.apply)}</span><span>${esc(ago(j.created))}</span></div></a>`;
+      return `<a class="job" href="${esc(j.url)}" target="_blank" rel="noopener"><div class="logo">${esc(initials(j.company))}${j.domain?`<img src="https://logo.clearbit.com/${esc(j.domain)}" alt="" loading="lazy" onerror="if(!this.dataset.f){this.dataset.f='1';this.src='https://www.google.com/s2/favicons?domain=${esc(j.domain)}&sz=64'}else{this.style.display='none'}">`:""}</div><div><h3>${esc(j.title)}</h3><div class="co">${esc(j.company)}${j.location?` · ${esc(j.location)}`:""}</div><div class="tags">${direct}${badge}${sal}${tags}</div></div><div class="side"><span class="apply">${esc(j.direct?T.applyDirect:T.apply)}</span><span>${esc(ago(j.created))}</span></div></a>`;
     }).join("");
     if(lm) lm.style.display=pool.length>vis.length?"inline-flex":"none";
     ld(vis);
