@@ -19,59 +19,77 @@ const fs = require("fs");
    ============================================================ */
 const COMPANIES = [
   // ---- Amazon (its own public search) ----
-  { name:"Amazon", ats:"amazon", query:"creative" },
+  { name:"Amazon", ats:"amazon", query:"creative", domain:"amazon.com" },
 
-  // ---- Greenhouse (token = the slug in boards.greenhouse.io/<token>) ----
-  { name:"Anthropic",  ats:"greenhouse", token:"anthropic" },
-  { name:"Stripe",     ats:"greenhouse", token:"stripe" },
-  { name:"Figma",      ats:"greenhouse", token:"figma" },
-  { name:"Airbnb",     ats:"greenhouse", token:"airbnb" },
-  { name:"DoorDash",   ats:"greenhouse", token:"doordash" },
-  { name:"Coinbase",   ats:"greenhouse", token:"coinbase" },
-  { name:"Robinhood",  ats:"greenhouse", token:"robinhood" },
-  { name:"Databricks", ats:"greenhouse", token:"databricks" },
-  { name:"Duolingo",   ats:"greenhouse", token:"duolingo" },
-  { name:"Cloudflare", ats:"greenhouse", token:"cloudflare" },
-  { name:"GitLab",     ats:"greenhouse", token:"gitlab" },
-  { name:"Brex",       ats:"greenhouse", token:"brex" },
-  { name:"Plaid",      ats:"greenhouse", token:"plaid" },
-  { name:"Rippling",   ats:"greenhouse", token:"rippling" },
-  { name:"Perplexity", ats:"greenhouse", token:"perplexityai" },
-  { name:"Discord",    ats:"greenhouse", token:"discord" },
-  { name:"Instacart",  ats:"greenhouse", token:"instacart" },
-  { name:"Gusto",      ats:"greenhouse", token:"gusto" },
+  // ---- Greenhouse (token = slug in boards.greenhouse.io/<token>) ----
+  { name:"Anthropic",  ats:"greenhouse", token:"anthropic",  domain:"anthropic.com" },
+  { name:"Stripe",     ats:"greenhouse", token:"stripe",     domain:"stripe.com" },
+  { name:"Figma",      ats:"greenhouse", token:"figma",      domain:"figma.com" },
+  { name:"Airbnb",     ats:"greenhouse", token:"airbnb",     domain:"airbnb.com" },
+  { name:"DoorDash",   ats:"greenhouse", token:"doordash",   domain:"doordash.com" },
+  { name:"Coinbase",   ats:"greenhouse", token:"coinbase",   domain:"coinbase.com" },
+  { name:"Robinhood",  ats:"greenhouse", token:"robinhood",  domain:"robinhood.com" },
+  { name:"Databricks", ats:"greenhouse", token:"databricks", domain:"databricks.com" },
+  { name:"Duolingo",   ats:"greenhouse", token:"duolingo",   domain:"duolingo.com" },
+  { name:"Cloudflare", ats:"greenhouse", token:"cloudflare", domain:"cloudflare.com" },
+  { name:"GitLab",     ats:"greenhouse", token:"gitlab",     domain:"gitlab.com" },
+  { name:"Brex",       ats:"greenhouse", token:"brex",       domain:"brex.com" },
+  { name:"Plaid",      ats:"greenhouse", token:"plaid",      domain:"plaid.com" },
+  { name:"Rippling",   ats:"greenhouse", token:"rippling",   domain:"rippling.com" },
+  { name:"Perplexity", ats:"greenhouse", token:"perplexityai", domain:"perplexity.ai" },
+  { name:"Discord",    ats:"greenhouse", token:"discord",    domain:"discord.com" },
+  { name:"Instacart",  ats:"greenhouse", token:"instacart",  domain:"instacart.com" },
+  { name:"Gusto",      ats:"greenhouse", token:"gusto",      domain:"gusto.com" },
 
-  // ---- Ashby (token = the slug in jobs.ashbyhq.com/<token>; often publishes salary) ----
-  { name:"OpenAI",     ats:"ashby", token:"openai" },
-  { name:"Ramp",       ats:"ashby", token:"ramp" },
-  { name:"Notion",     ats:"ashby", token:"notion" },
-  { name:"Linear",     ats:"ashby", token:"linear" },
-  { name:"Deel",       ats:"ashby", token:"deel" },
-  { name:"Snowflake",  ats:"ashby", token:"snowflake" },
-  { name:"Shopify",    ats:"ashby", token:"Shopify" },
-  { name:"Cursor",     ats:"ashby", token:"cursor" },
-  { name:"Vanta",      ats:"ashby", token:"vanta" },
-  { name:"Retool",     ats:"ashby", token:"retool" },
-  { name:"Zapier",     ats:"ashby", token:"zapier" },
-  { name:"Mercury",    ats:"ashby", token:"mercury" },
-  { name:"Cohere",     ats:"ashby", token:"cohere" },
-  { name:"Confluent",  ats:"ashby", token:"confluent" },
-  { name:"Replit",     ats:"ashby", token:"replit" },
-  { name:"Gorgias",    ats:"ashby", token:"gorgias" },
+  // ---- Ashby (token = slug in jobs.ashbyhq.com/<token>; often publishes salary) ----
+  { name:"OpenAI",     ats:"ashby", token:"openai",    domain:"openai.com" },
+  { name:"Ramp",       ats:"ashby", token:"ramp",      domain:"ramp.com" },
+  { name:"Notion",     ats:"ashby", token:"notion",    domain:"notion.so" },
+  { name:"Linear",     ats:"ashby", token:"linear",    domain:"linear.app" },
+  { name:"Deel",       ats:"ashby", token:"deel",      domain:"deel.com" },
+  { name:"Snowflake",  ats:"ashby", token:"snowflake", domain:"snowflake.com" },
+  { name:"Shopify",    ats:"ashby", token:"Shopify",   domain:"shopify.com" },
+  { name:"Cursor",     ats:"ashby", token:"cursor",    domain:"cursor.com" },
+  { name:"Vanta",      ats:"ashby", token:"vanta",     domain:"vanta.com" },
+  { name:"Retool",     ats:"ashby", token:"retool",    domain:"retool.com" },
+  { name:"Zapier",     ats:"ashby", token:"zapier",    domain:"zapier.com" },
+  { name:"Mercury",    ats:"ashby", token:"mercury",   domain:"mercury.com" },
+  { name:"Cohere",     ats:"ashby", token:"cohere",    domain:"cohere.com" },
+  { name:"Confluent",  ats:"ashby", token:"confluent", domain:"confluent.io" },
+  { name:"Replit",     ats:"ashby", token:"replit",    domain:"replit.com" },
+  { name:"Gorgias",    ats:"ashby", token:"gorgias",   domain:"gorgias.com" },
 
   // ---- Lever (token = slug in jobs.lever.co/<token>) ----
-  { name:"Palantir",   ats:"lever", token:"palantir" },
+  { name:"Palantir",   ats:"lever", token:"palantir",  domain:"palantir.com" },
+
+  // ---- Creative & games (art / animation / design / narrative roles land in Creative; programmers -> Engineering) ----
+  { name:"Riot Games", ats:"greenhouse", token:"riotgames",  domain:"riotgames.com" },
+  { name:"Epic Games", ats:"greenhouse", token:"epicgames",  domain:"epicgames.com" },
+  { name:"Bungie",     ats:"greenhouse", token:"bungie",     domain:"bungie.net" },
+  { name:"Roblox",     ats:"greenhouse", token:"roblox",     domain:"roblox.com" },
+  { name:"2K",         ats:"greenhouse", token:"2k",         domain:"2k.com" },
+  { name:"Scopely",    ats:"greenhouse", token:"scopely",    domain:"scopely.com" },
+  { name:"Supercell",       ats:"ashby", token:"supercell",       domain:"supercell.com" },
+  { name:"Second Dinner",   ats:"ashby", token:"seconddinner",    domain:"seconddinner.com" },
+  { name:"thatgamecompany", ats:"ashby", token:"thatgamecompany", domain:"thatgamecompany.com" },
+  { name:"Ubisoft",    ats:"smartrecruiters", token:"Ubisoft",  domain:"ubisoft.com" },
+  { name:"Gameloft",   ats:"smartrecruiters", token:"Gameloft", domain:"gameloft.com" },
+  { name:"CD Projekt Red", ats:"smartrecruiters", token:"CDPROJEKTRED", domain:"cdprojektred.com" },
+  { name:"Larian Studios", ats:"lever", token:"larianstudios",   domain:"larian.com" },
+  { name:"Behaviour Interactive", ats:"lever", token:"behaviourinteractive", domain:"behaviour.com" },
+  { name:"Skydance",   ats:"lever", token:"skydance",  domain:"skydance.com" },
+  { name:"Canva",      ats:"lever", token:"canva",     domain:"canva.com" },
 
   // ---- Workday (paste the careers URL ending in myworkdayjobs.com/…) ----
-  { name:"Netflix", ats:"workday", url:"https://netflix.wd108.myworkdayjobs.com/Netflix" },
-  { name:"Disney",  ats:"workday", url:"https://disney.wd5.myworkdayjobs.com/disneycareer" },
-  { name:"NVIDIA",  ats:"workday", url:"https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite" },
-  { name:"Adobe",   ats:"workday", url:"https://adobe.wd5.myworkdayjobs.com/external_experienced" },
+  { name:"Netflix", ats:"workday", url:"https://netflix.wd108.myworkdayjobs.com/Netflix", domain:"netflix.com" },
+  { name:"Disney",  ats:"workday", url:"https://disney.wd5.myworkdayjobs.com/disneycareer", domain:"disney.com" },
+  { name:"NVIDIA",  ats:"workday", url:"https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite", domain:"nvidia.com" },
+  { name:"Adobe",   ats:"workday", url:"https://adobe.wd5.myworkdayjobs.com/external_experienced", domain:"adobe.com" },
 
   // Tokens are researched but not individually test-run here. After your first daily run,
   // check the Actions log: any company showing 0 jobs just needs its slug corrected —
-  // open that company's careers page, copy the token from the URL, and fix the line.
-  // Add any company the same way. Bethesda/ZeniMax uses a custom site (needs its own adapter).
+  // open that company's careers page and copy the token from the URL. Failures are silent
+  // and never break the others. Bethesda/ZeniMax uses a custom site (needs its own adapter).
 ];
 
 const isRemoteText = s => /(^|[^a-z])(remote|virtual|anywhere|work from home|wfh|distributed)([^a-z]|$)/i.test(s||"");
@@ -81,7 +99,7 @@ function norm(c,id,title,url,remote,location,tags,description,created,salary){
   if(typeof created==="number") iso=new Date(created).toISOString();
   else { const d=new Date(created); iso=isNaN(d)?new Date().toISOString():d.toISOString(); }
   return { id:c.ats+"-"+(c.token||c.name||"co").toString().toLowerCase().replace(/\W+/g,"")+"-"+id, title:title||"", company:c.name, url:url||"",
-    remote:!!remote, relocate:!remote, direct:true, location:location||"", tags:tags||[],
+    remote:!!remote, relocate:!remote, direct:true, location:location||"", tags:tags||[], domain:c.domain||"",
     description:description||"", created:iso, salary:salary||"", source:c.name };
 }
 
@@ -222,17 +240,17 @@ function diversify(list, perCompany, total){
 
   // Remote company roles enrich the main board; onsite roster roles feed the relocate tab.
   const remoteCompany = companyArr.filter(j=>j.remote);
-  const onsite        = companyArr.filter(j=>!j.remote && isSenior(j)); // prestige onsite roles only
+  const onsite        = companyArr.filter(j=>!j.remote);   // all onsite roster roles (relocate tab)
 
   let main = dedupe([].concat(aggArr, remoteCompany).filter(keep));
   main.forEach(j=>j.relocate=false);
   main.sort((a,b)=> ((b.direct?1:0)-(a.direct?1:0)) || scoreOf(b)-scoreOf(a) || new Date(b.created)-new Date(a.created));
-  main = diversify(main, 5, 130);   // at most 5 per company → wide variety
+  main = diversify(main, 6, 260);   // at most 6 per company → wide variety, real depth per sector
 
   let relocate = dedupe(onsite.filter(j=>!isJunk(j)));
   relocate.forEach(j=>j.relocate=true);
   relocate.sort((a,b)=> scoreOf(b)-scoreOf(a) || new Date(b.created)-new Date(a.created));
-  relocate = diversify(relocate, 8, 70);
+  relocate = diversify(relocate, 8, 140);
 
   const outAll = main.concat(relocate);
   fs.writeFileSync("jobs.json", JSON.stringify(outAll));
