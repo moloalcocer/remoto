@@ -80,6 +80,13 @@ const COMPANIES = [
   { name:"Skydance",   ats:"lever", token:"skydance",  domain:"skydance.com" },
   { name:"Canva",      ats:"lever", token:"canva",     domain:"canva.com" },
 
+  // ---- Workable (token = slug in apply.workable.com/<token>) ----
+  { name:"Hugging Face",    ats:"workable", token:"huggingface",    domain:"huggingface.co" },
+  { name:"Square Enix",     ats:"workable", token:"squareenix",     domain:"square-enix.com" },
+  { name:"Keywords Studios",ats:"workable", token:"keywordsstudios",domain:"keywordsstudios.com" },
+  { name:"Team17",          ats:"workable", token:"team17",         domain:"team17.com" },
+  { name:"Rebellion",       ats:"workable", token:"rebellion",      domain:"rebellion.com" },
+
   // ---- Workday (paste the careers URL ending in myworkdayjobs.com/…) ----
   { name:"Netflix", ats:"workday", url:"https://netflix.wd108.myworkdayjobs.com/Netflix", domain:"netflix.com" },
   { name:"Disney",  ats:"workday", url:"https://disney.wd5.myworkdayjobs.com/disneycareer", domain:"disney.com" },
@@ -163,10 +170,21 @@ function workdayDate(s){
   if((m=t.match(/(\d+)\+?\s*month/))) return new Date(now-parseInt(m[1],10)*30*864e5).toISOString();
   return new Date().toISOString();
 }
+async function workable(c){
+  const r=await fetch(`https://apply.workable.com/api/v1/widget/accounts/${c.token}?details=true`);
+  const j=await r.json();
+  return (j.jobs||[]).map(x=>{
+    const loc=[x.city,x.state,x.country].filter(Boolean).join(", ");
+    const remote=!!x.telecommuting||isRemoteText(loc)||isRemoteText(x.title);
+    const url=x.url||x.application_url||`https://apply.workable.com/${c.token}/j/${x.shortcode}/`;
+    return norm(c,x.shortcode||x.id||x.title,x.title,url,remote,loc,x.department?[x.department]:[],x.description||"",x.published_on||x.created_at);
+  });
+}
 async function fetchCompany(c){
-  const fn={greenhouse,lever,ashby,smartrecruiters,amazon:amazonJobs,workday}[c.ats];
+  const fn={greenhouse,lever,ashby,smartrecruiters,amazon:amazonJobs,workday,workable}[c.ats];
   if(!fn) return [];
-  try{ return await fn(c); }catch(e){ console.error("company "+c.name, e.message); return []; }
+  try{ const jobs=await fn(c); console.log(`  ${c.name} (${c.ats}): ${jobs.length}`); return jobs; }
+  catch(e){ console.error(`  ${c.name} (${c.ats}): ERROR ${e.message}`); return []; }
 }
 async function sourceCompanies(){
   const r=await Promise.all(COMPANIES.map(fetchCompany));
