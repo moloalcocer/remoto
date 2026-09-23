@@ -226,8 +226,9 @@ const JUNK = ["junior","jr ","jr.","intern","internship","entry level","entry-le
 const SENIOR = ["senior","sr ","sr.","lead","staff","principal","head of","director","architect","expert","manager","vp of","chief","tech lead"];
 const strip = h => (h||"").replace(/<[^>]*>/g," ").replace(/\s+/g," ").trim();
 function salaryOf(j){
-  const t=((j.salary||"")+" "+(j.title||"")+" "+strip(j.description)).toLowerCase(); let best=0;
-  (t.match(/\$?\s?(\d{2,3})\s?k\b/g)||[]).forEach(m=>{const n=parseInt(m.replace(/[^\d]/g,""),10)*1000; if(n>best)best=n;});
+  let t=((j.salary||"")+" "+(j.title||"")+" "+strip(j.description)).toLowerCase(); let best=0;
+  t=t.replace(/\b(401|403|457)\s?\(?\s?[kb]\)?/g," ");   // ignore 401(k)/403(b)/457 retirement mentions
+  (t.match(/\$?\s?(\d{2,3})\s?k\b/g)||[]).forEach(m=>{const n=parseInt(m.replace(/[^\d]/g,""),10); if(n>=30&&n<=900){const v=n*1000; if(v>best)best=v;}});
   (t.match(/\$\s?\d{2,3}(?:[,\.]\d{3})+/g)||[]).forEach(m=>{const n=parseInt(m.replace(/[^\d]/g,""),10); if(n>=30000&&n<=1000000&&n>best)best=n;});
   (t.match(/\$\s?(\d{2,3})(?:\.\d+)?\s?(?:\/\s?hr|\/\s?hour|per hour|hourly|\/h\b)/g)||[]).forEach(m=>{const n=parseInt(m.replace(/[^\d]/g,""),10)*2080; if(n>best)best=n;});
   return best;
