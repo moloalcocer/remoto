@@ -46,8 +46,9 @@
   async function feedJobicy(){try{const r=await fetch("https://jobicy.com/api/v2/remote-jobs?count=50");const j=await r.json();return(j.jobs||[]).map(x=>({id:"jb-"+x.id,title:x.jobTitle,company:x.companyName,url:x.url,location:x.jobGeo||"",tags:[].concat(x.jobIndustry||[],x.jobLevel||[]),description:x.jobExcerpt||x.jobDescription||"",created:x.pubDate||new Date().toISOString(),salary:(x.annualSalaryMin&&x.annualSalaryMax)?`$${(+x.annualSalaryMin/1000)|0}k–$${(+x.annualSalaryMax/1000)|0}k`:"",source:"Jobicy"}));}catch(e){return[];}}
 
   function dedupe(a){const s=new Set(),o=[];for(const j of a){if(!j.title||!j.company)continue;const k=(j.company+"|"+j.title).toLowerCase().replace(/\s+/g," ").trim();if(s.has(k))continue;s.add(k);o.push(j);}return o;}
-  function salaryOf(j){const t=((j.salary||"")+" "+(j.title||"")+" "+strip(j.description)).toLowerCase();let b=0;
-    (t.match(/\$?\s?(\d{2,3})\s?k\b/g)||[]).forEach(m=>{const n=parseInt(m.replace(/[^\d]/g,""),10)*1000;if(n>b)b=n;});
+  function salaryOf(j){let t=((j.salary||"")+" "+(j.title||"")+" "+strip(j.description)).toLowerCase();let b=0;
+    t=t.replace(/\b(401|403|457)\s?\(?\s?[kb]\)?/g," ");
+    (t.match(/\$?\s?(\d{2,3})\s?k\b/g)||[]).forEach(m=>{const n=parseInt(m.replace(/[^\d]/g,""),10);if(n>=30&&n<=900){const v=n*1000;if(v>b)b=v;}});
     (t.match(/\$\s?\d{2,3}(?:[,\.]\d{3})+/g)||[]).forEach(m=>{const n=parseInt(m.replace(/[^\d]/g,""),10);if(n>=30000&&n<=1000000&&n>b)b=n;});
     (t.match(/\$\s?(\d{2,3})(?:\.\d+)?\s?(?:\/\s?hr|\/\s?hour|per hour|hourly|\/h\b)/g)||[]).forEach(m=>{const n=parseInt(m.replace(/[^\d]/g,""),10)*2080;if(n>b)b=n;});
     return b;}
