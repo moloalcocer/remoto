@@ -242,6 +242,7 @@
   .dreamrow input:focus{outline:2px solid var(--rosa);outline-offset:1px;border-color:transparent}
   .dreamb{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--jade-soft);border:1px solid color-mix(in srgb,var(--jade) 30%,transparent);color:var(--ink);padding:10px 16px;border-radius:12px;margin-top:14px;font-size:14.5px}
   .dreamb button{margin-left:auto;background:none;border:0;color:var(--rosa);font:inherit;font-weight:700;cursor:pointer}
+  .tag.web{background:transparent;color:var(--muted);border-color:var(--line)}
 </style>
 </head>
 <body>
@@ -540,7 +541,7 @@ let salariedOnly = false;
 let directOnly = false;
 let relocateOn = false;
 let cvText = ""; let cvSkills = new Set(); let cvLoaded = false; let matchSort = false;
-let dreamQuery = ""; let dreamOn = false;
+let dreamQuery = ""; let dreamOn = false; let dreamExtra = [];
 let shown = CONFIG.PAGE_SIZE;
 let query = "";
 const t = (k) => I18N[LANG][k];
@@ -698,7 +699,7 @@ function qualityScore(job){
 /* ---------- render ---------- */
 function render(){
   const list=document.getElementById("job-list");
-  let jobs=ALL_JOBS.slice();
+  let jobs=(dreamOn?ALL_JOBS.concat(dreamExtra):ALL_JOBS).slice();
   jobs.forEach(j=>{ j._latam=latamScore(j); j._sal=parseSalary(j); j._pin=isPinned(j)?1:0; j._score=qualityScore(j); if(cvLoaded) j._match=jobMatchPct(j); });
   let pool;
   if(dreamOn && dreamQuery.trim()){
@@ -712,7 +713,7 @@ function render(){
     if(latamOnly) jobs=jobs.filter(j=>j._latam===1);
     jobs.sort((a,b)=> (b._dream-a._dream) || (b._score-a._score));
     pool = jobs.slice(0, CONFIG.MAX_JOBS);
-    showDreamBanner(q, pool.length);
+    showDreamBanner(q, pool.length, pool.filter(j=>j.web).length);
   } else {
     hideDreamBanner();
     if(relocateOn){
@@ -755,13 +756,14 @@ function render(){
     const direct = j.direct?`<span class="tag direct">${esc(t("direct_badge"))}</span>`:"";
     const match = cvLoaded?`<span class="tag match ${j._match>=70?'hi':j._match>=40?'mid':'lo'}">${j._match}% ${LANG==="es"?"afín":"match"}</span>`:"";
     const feat = j._pin?`<span class="tag featured">★ ${esc(t("featured_badge"))}</span>`:"";
+    const web = j.web?`<span class="tag web" title="${LANG==="es"?"De la búsqueda web ampliada":"From the wider web search"}">web</span>`:"";
     const applyTxt = j.direct?t("apply_direct"):t("apply");
     return `<a class="job" href="${esc(j.url)}" target="_blank" rel="noopener">
       <div class="logo">${esc(initials(j.company))}${j.domain?`<img src="https://logo.clearbit.com/${esc(j.domain)}" alt="" loading="lazy" onerror="if(!this.dataset.f){this.dataset.f='1';this.src='https://www.google.com/s2/favicons?domain=${esc(j.domain)}&sz=64'}else{this.style.display='none'}">`:""}</div>
       <div>
         <h3>${esc(j.title)}</h3>
         <div class="co">${esc(j.company)}${j.location?` · ${esc(j.location)}`:""}</div>
-        <div class="tags">${feat}${match}${direct}${badge}${sal}${tags}</div>
+        <div class="tags">${feat}${web}${match}${direct}${badge}${sal}${tags}</div>
       </div>
       <div class="side"><span class="apply">${esc(applyTxt)}</span><span>${esc(timeAgo(j.created))}</span></div>
     </a>`;
@@ -965,14 +967,32 @@ function dreamScore(job,qtok,qshin,qcat,qskills){
   if(cvLoaded){ const m=(job._match!=null?job._match:jobMatchPct(job)); s+=m*0.2; }
   return s;
 }
-function showDreamBanner(q,n){
+function showDreamBanner(q,n,web){
   const b=document.getElementById("dream-banner"); if(!b) return; b.hidden=false; const es=LANG==="es";
-  b.innerHTML=`<div class="dreamb">★ <strong>${n}</strong>&nbsp;${es?"coincidencias para":"matches for"} “${esc(q)}”<button id="dream-clear">${es?"limpiar ✕":"clear ✕"}</button></div>`;
+  const extra = web>0 ? ` · ${web} ${es?"de la búsqueda web":"from the wider web"}` : "";
+  b.innerHTML=`<div class="dreamb">★ <strong>${n}</strong>&nbsp;${es?"coincidencias para":"matches for"} “${esc(q)}”${extra}<button id="dream-clear">${es?"limpiar ✕":"clear ✕"}</button></div>`;
   const c=document.getElementById("dream-clear"); if(c) c.onclick=clearDream;
 }
 function hideDreamBanner(){ const b=document.getElementById("dream-banner"); if(b) b.hidden=true; }
-function clearDream(){ dreamOn=false; dreamQuery=""; const di=document.getElementById("dream-input"); if(di) di.value=""; shown=CONFIG.PAGE_SIZE; render(); }
-function runDream(){ const v=document.getElementById("dream-input").value.trim(); if(!v){ clearDream(); return; } dreamQuery=v; dreamOn=true; shown=CONFIG.PAGE_SIZE; render(); const j=document.getElementById("jobs"); if(j) j.scrollIntoView({behavior:"smooth"}); }
+function clearDream(){ dreamOn=false; dreamQuery=""; dreamExtra=[]; const di=document.getElementById("dream-input"); if(di) di.value=""; shown=CONFIG.PAGE_SIZE; render(); }
+function runDream(){ const v=document.getElementById("dream-input").value.trim(); if(!v){ clearDream(); return; } dreamQuery=v; dreamOn=true; dreamExtra=[]; shown=CONFIG.PAGE_SIZE; render(); const j=document.getElementById("jobs"); if(j) j.scrollIntoView({behavior:"smooth"}); expandDream(v); }
+/* If the curated set is thin, search the wider remote-jobs index (Remotive) by keyword and fold in precise matches only. */
+async function expandDream(q){
+  const kw=tokensOf(q).slice(0,5).join(" "); if(!kw) return;
+  try{
+    const r=await fetch("https://remotive.com/api/remote-jobs?search="+encodeURIComponent(kw));
+    if(!r.ok) return; const j=await r.json();
+    if(!(dreamOn && dreamQuery.trim()===q.trim())) return;   // user moved on
+    const have=new Set(ALL_JOBS.map(x=>(x.company+"|"+x.title).toLowerCase().replace(/\s+/g," ").trim()));
+    const qtok=tokensOf(q), qshin=shingles(qtok), qcat=primaryCategory(q), qskills=extractSkills(q).concat(cvLoaded?[...cvSkills]:[]);
+    const found=(j.jobs||[]).map(x=>({ id:"rmw-"+x.id, title:x.title, company:x.company_name, url:x.url, remote:true, relocate:false, direct:false, web:true,
+        location:x.candidate_required_location||"", tags:x.tags||[], description:x.description||"", created:x.publication_date||new Date().toISOString(), salary:x.salary||"", domain:"" }))
+      .filter(x=>x.title&&x.company&&!have.has((x.company+"|"+x.title).toLowerCase().replace(/\s+/g," ").trim()))
+      .filter(x=> dreamScore(x,qtok,qshin,qcat,qskills)>=45)
+      .slice(0,40);
+    if(found.length){ dreamExtra=found; render(); }
+  }catch(e){}
+}
 document.getElementById("dream-go").addEventListener("click",runDream);
 document.getElementById("dream-input").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); runDream(); } });
 
