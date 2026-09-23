@@ -705,7 +705,7 @@ function render(){
   if(dreamOn && dreamQuery.trim()){
     const q=dreamQuery.trim();
     const qtok=tokensOf(q), qshin=shingles(qtok), qcat=primaryCategory(q), qskills=extractSkills(q).concat(cvLoaded?[...cvSkills]:[]);
-    jobs = relocateOn ? jobs : jobs.filter(j=>!j.relocate);
+    // dream mode searches everything — remote and onsite — because "work at X" means any role there
     jobs.forEach(j=> j._dream=dreamScore(j,qtok,qshin,qcat,qskills));
     jobs = jobs.filter(j=>j._dream>=45);            // precision gate — only real matches
     if(directOnly||CONFIG.DIRECT_APPLY_ONLY) jobs=jobs.filter(j=>j.direct);
@@ -741,7 +741,10 @@ function render(){
   const lm = document.getElementById("load-more");
 
   if(!pool.length){
-    list.innerHTML=`<div class="state"><h3>${esc(t("none_h"))}</h3><p>${esc(t("none_p"))}</p></div>`;
+    const es=LANG==="es";
+    const h = dreamOn ? (es?"Sin coincidencias todavía":"No matches yet") : t("none_h");
+    const p = dreamOn ? (es?"Buscamos en nuestras empresas y en el índice remoto más amplio. Prueba con el puesto en vez del sector (p. ej. ‘diseñador’ en vez de ‘club de fútbol’) — o puede que ese campo no tenga vacantes remotas ahora mismo.":"We searched our companies and the wider remote index. Try the role instead of the industry (e.g. ‘designer’ rather than ‘soccer club’) — or that field may simply not have remote listings right now.") : t("none_p");
+    list.innerHTML=`<div class="state"><h3>${esc(h)}</h3><p>${esc(p)}</p></div>`;
     document.getElementById("jobs-ld").textContent="";
     if(lm) lm.style.display="none";
     return;
@@ -956,13 +959,16 @@ function tokensOf(s){ return [...new Set((s||"").toLowerCase().replace(/[^a-z0-9
 function shingles(tok){ const o=[]; for(let i=0;i<tok.length-1;i++) o.push(tok[i]+" "+tok[i+1]); return o; }
 function dreamScore(job,qtok,qshin,qcat,qskills){
   const title=(job.title||"").toLowerCase();
+  const co=(job.company||"").toLowerCase();
   if(qcat!=="other" && primaryCategory(job.title)!==qcat) return 0;   // domain gate (designer ≠ database designer)
-  let s=0, phrase=false;
-  for(const ph of qshin){ if(title.includes(ph)){ s+=100; phrase=true; } }
-  const hit=qtok.filter(w=>wordHit(title,w)).length;
-  if(qtok.length) s+=(hit/qtok.length)*60;
-  if(hit===0 && !phrase) return 0;                                   // role word must be in the title
-  const jh=(title+" "+(job.tags||[]).join(" ")+" "+stripHtml(job.description||"")).toLowerCase();
+  let s=0, hitAny=false;
+  for(const ph of qshin){ if(title.includes(ph)){ s+=100; hitAny=true; } else if(co.includes(ph)){ s+=90; hitAny=true; } }
+  const th=qtok.filter(w=>wordHit(title,w)).length;
+  const ch=qtok.filter(w=>wordHit(co,w)).length;
+  if(qtok.length){ s+=(th/qtok.length)*60; s+=(ch/qtok.length)*55; }
+  if(th>0||ch>0) hitAny=true;
+  if(!hitAny) return 0;                                              // must hit the title or the company
+  const jh=(title+" "+co+" "+(job.tags||[]).join(" ")+" "+stripHtml(job.description||"")).toLowerCase();
   s += qskills.filter(k=>wordHit(jh,k)).length*12;
   if(cvLoaded){ const m=(job._match!=null?job._match:jobMatchPct(job)); s+=m*0.2; }
   return s;
