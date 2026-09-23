@@ -237,6 +237,11 @@
   .res-card p{font-size:14px;color:var(--ink-soft);margin:8px 0 16px;flex:1}
   .res-card .go{font-size:14px;font-weight:700;color:var(--rosa)}
   .res-note{font-size:12.5px;color:var(--muted);margin-top:18px}
+  .dreamrow{display:flex;gap:10px;padding:0 0 20px;flex-wrap:wrap}
+  .dreamrow input{flex:1;min-width:240px;font:inherit;font-size:16px;padding:13px 17px;border:1.5px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink)}
+  .dreamrow input:focus{outline:2px solid var(--rosa);outline-offset:1px;border-color:transparent}
+  .dreamb{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--jade-soft);border:1px solid color-mix(in srgb,var(--jade) 30%,transparent);color:var(--ink);padding:10px 16px;border-radius:12px;margin-top:14px;font-size:14.5px}
+  .dreamb button{margin-left:auto;background:none;border:0;color:var(--rosa);font:inherit;font-weight:700;cursor:pointer}
 </style>
 </head>
 <body>
@@ -278,6 +283,10 @@
         <input type="file" id="cv-file" accept=".pdf,.txt,.docx" hidden>
         <span id="cv-btn-label" data-i18n="cv_btn">Upload CV</span>
       </label>
+    </div>
+    <div class="dreamrow">
+      <input id="dream-input" type="text" placeholder="Describe your dream role — e.g. ‘senior product designer at a startup’" data-i18n-ph="dream_ph" aria-label="Dream job">
+      <button class="btn btn-dark" id="dream-go" data-i18n="dream_go">Find my match</button>
     </div>
     <div class="cv-panel" id="cv-panel" hidden>
       <div class="cv-score">
@@ -330,6 +339,7 @@
 </div>
 
 <main>
+  <div class="wrap" id="dream-banner" hidden></div>
   <div class="wrap" id="job-list">
     <div class="state"><div class="spinner"></div><span data-i18n="loading">Pulling in today’s remote roles…</span></div>
   </div>
@@ -485,7 +495,7 @@ const I18N = {
     hero_sub:"A tight, curated board of high-paying remote roles open to Latin American talent. We screen out the noise — only the crème de la crème makes it in.",
     search_ph:"Search role, skill or company…", hero_cta:"Browse roles",
     hero_trust:"Free for job seekers. Every role is screened for pay and seniority — no spam, no low-ball listings.",
-    latam_toggle:"LatAm-friendly only", salaried_toggle:"Salary disclosed", direct_toggle:"Direct apply only", relocate_toggle:"Willing to relocate?", direct_badge:"Direct", apply_direct:"Apply direct →", refresh:"↻ Refresh", loading:"Pulling in today’s remote roles…", load_more:"Load more", match_toggle:"Best matches for me", cv_h:"Match jobs to your CV", cv_sub:"Upload your CV — we’ll score it for ATS-readiness and rank every role by how well it fits. It never leaves your device.", cv_btn:"Upload CV", cv_ats:"ATS-readiness", cv_clear:"Remove CV",
+    latam_toggle:"LatAm-friendly only", salaried_toggle:"Salary disclosed", direct_toggle:"Direct apply only", relocate_toggle:"Willing to relocate?", direct_badge:"Direct", apply_direct:"Apply direct →", refresh:"↻ Refresh", loading:"Pulling in today’s remote roles…", load_more:"Load more", match_toggle:"Best matches for me", cv_h:"Match jobs to your CV", cv_sub:"Upload your CV — we’ll score it for ATS-readiness and rank every role by how well it fits. It never leaves your device.", cv_btn:"Upload CV", cv_ats:"ATS-readiness", cv_clear:"Remove CV", dream_ph:"Describe your dream role — e.g. ‘senior product designer at a startup’", dream_go:"Find my match",
     emp_h2:"Hire senior talent that works your hours.",
     emp_lead:"Latin American professionals overlap the full US workday — no 2am standups. Post your remote role in front of a focused, motivated audience.",
     t1_name:"First post", t1_price:"Free", t1_per:"launch offer · 30 days", t1_a:"One live listing for 30 days", t1_b:"Prove the audience, then decide",
@@ -505,7 +515,7 @@ const I18N = {
     hero_sub:"Un tablero curado de empleos remotos bien pagados, abiertos a talento latinoamericano. Filtramos el ruido — solo la crème de la crème entra.",
     search_ph:"Busca puesto, habilidad o empresa…", hero_cta:"Ver vacantes",
     hero_trust:"Gratis para candidatos. Cada vacante se filtra por salario y seniority — sin spam, sin ofertas mediocres.",
-    latam_toggle:"Solo abiertas a LatAm", salaried_toggle:"Con salario", direct_toggle:"Solo aplicación directa", relocate_toggle:"¿Dispuesto a mudarte?", direct_badge:"Directo", apply_direct:"Aplica directo →", refresh:"↻ Actualizar", loading:"Cargando las vacantes de hoy…", load_more:"Ver más", match_toggle:"Mejores para mí", cv_h:"Empareja empleos con tu CV", cv_sub:"Sube tu CV — lo evaluamos para compatibilidad ATS y ordenamos cada vacante según qué tan bien encaja. Nunca sale de tu dispositivo.", cv_btn:"Subir CV", cv_ats:"Compatibilidad ATS", cv_clear:"Quitar CV",
+    latam_toggle:"Solo abiertas a LatAm", salaried_toggle:"Con salario", direct_toggle:"Solo aplicación directa", relocate_toggle:"¿Dispuesto a mudarte?", direct_badge:"Directo", apply_direct:"Aplica directo →", refresh:"↻ Actualizar", loading:"Cargando las vacantes de hoy…", load_more:"Ver más", match_toggle:"Mejores para mí", cv_h:"Empareja empleos con tu CV", cv_sub:"Sube tu CV — lo evaluamos para compatibilidad ATS y ordenamos cada vacante según qué tan bien encaja. Nunca sale de tu dispositivo.", cv_btn:"Subir CV", cv_ats:"Compatibilidad ATS", cv_clear:"Quitar CV", dream_ph:"Describe tu empleo ideal — ej. ‘diseñador de producto senior en una startup’", dream_go:"Buscar mi match",
     emp_h2:"Contrata talento senior en tu horario.",
     emp_lead:"Los profesionales de Latinoamérica coinciden con toda la jornada de EE. UU. Publica tu vacante remota frente a una audiencia enfocada y motivada.",
     t1_name:"Primera publicación", t1_price:"Gratis", t1_per:"oferta de lanzamiento · 30 días", t1_a:"Una vacante activa por 30 días", t1_b:"Comprueba la audiencia y decide",
@@ -530,6 +540,7 @@ let salariedOnly = false;
 let directOnly = false;
 let relocateOn = false;
 let cvText = ""; let cvSkills = new Set(); let cvLoaded = false; let matchSort = false;
+let dreamQuery = ""; let dreamOn = false;
 let shown = CONFIG.PAGE_SIZE;
 let query = "";
 const t = (k) => I18N[LANG][k];
@@ -626,7 +637,7 @@ function wordHit(hay,kw){
 const CLASSIFY = [
   ["creative", ["animator","animation","vfx","motion designer","motion graphics","3d artist","3d modeler","3d generalist","game designer","game artist","game design","art director","concept artist","concept art","illustrator","storyboard","character artist","character designer","level designer","environment artist","video editor","video producer","cinematographer","colorist","compositor","creative director","creative producer","narrative designer","sound designer","technical artist","filmmaker"]],
   ["data", ["data scientist","data engineer","data analyst","analytics engineer","machine learning","ml engineer","ai engineer","data science","business intelligence","bi analyst","analytics"]],
-  ["eng", ["software engineer","engineer","developer","back end","backend","front end","frontend","full stack","fullstack","full-stack","devops","programmer","sre","site reliability","mobile engineer","ios","android","platform engineer","qa engineer","security engineer","game developer","game programmer","gameplay","architect","engineering manager"]],
+  ["eng", ["software engineer","engineer","developer","database","dba","sql developer","back end","backend","front end","frontend","full stack","fullstack","full-stack","devops","programmer","sre","site reliability","mobile engineer","ios","android","platform engineer","qa engineer","security engineer","game developer","game programmer","gameplay","architect","engineering manager"]],
   ["product", ["product manager","product owner","head of product","product lead","product management","program manager","technical product manager","group product manager","director of product","vp product"]],
   ["design", ["ux designer","ui designer","ux/ui","product designer","graphic designer","web designer","brand designer","visual designer","design lead","design director","design manager","ux researcher","user researcher","design system","designer"]],
   ["finance", ["financial analyst","finance manager","finance","accounting","accountant","controller","fp&a","treasury","investment","tax","audit","auditor","banking","cfo","equity research","portfolio manager","underwriter","bookkeeper"]],
@@ -689,24 +700,40 @@ function render(){
   const list=document.getElementById("job-list");
   let jobs=ALL_JOBS.slice();
   jobs.forEach(j=>{ j._latam=latamScore(j); j._sal=parseSalary(j); j._pin=isPinned(j)?1:0; j._score=qualityScore(j); if(cvLoaded) j._match=jobMatchPct(j); });
-  if(relocateOn){
-    jobs=jobs.filter(j=>j.relocate && !isJunk(j));   // relocation/onsite roles…
-    jobs=jobs.filter(j=>catMatch(j,activeCat));       // …narrowed by the selected role type
+  let pool;
+  if(dreamOn && dreamQuery.trim()){
+    const q=dreamQuery.trim();
+    const qtok=tokensOf(q), qshin=shingles(qtok), qcat=primaryCategory(q), qskills=extractSkills(q).concat(cvLoaded?[...cvSkills]:[]);
+    jobs = relocateOn ? jobs : jobs.filter(j=>!j.relocate);
+    jobs.forEach(j=> j._dream=dreamScore(j,qtok,qshin,qcat,qskills));
+    jobs = jobs.filter(j=>j._dream>=45);            // precision gate — only real matches
+    if(directOnly||CONFIG.DIRECT_APPLY_ONLY) jobs=jobs.filter(j=>j.direct);
     if(salariedOnly) jobs=jobs.filter(j=>j._sal>0);
-    if(query){ const q=query.toLowerCase(); jobs=jobs.filter(j=>(j.title+" "+j.company+" "+(j.tags||[]).join(" ")).toLowerCase().includes(q)); }
-  }else{
-    jobs=jobs.filter(j=>!j.relocate);                 // main board stays remote-only
-    jobs=jobs.filter(passesCuration);                 // curation gate: high pay / senior / no junk
     if(latamOnly) jobs=jobs.filter(j=>j._latam===1);
-    jobs=jobs.filter(j=>catMatch(j,activeCat));
-    if(query){ const q=query.toLowerCase(); jobs=jobs.filter(j=>(j.title+" "+j.company+" "+(j.tags||[]).join(" ")).toLowerCase().includes(q)); }
+    jobs.sort((a,b)=> (b._dream-a._dream) || (b._score-a._score));
+    pool = jobs.slice(0, CONFIG.MAX_JOBS);
+    showDreamBanner(q, pool.length);
+  } else {
+    hideDreamBanner();
+    if(relocateOn){
+      jobs=jobs.filter(j=>j.relocate && !isJunk(j));   // relocation/onsite roles…
+      jobs=jobs.filter(j=>catMatch(j,activeCat));       // …narrowed by the selected role type
+      if(salariedOnly) jobs=jobs.filter(j=>j._sal>0);
+      if(query){ const q=query.toLowerCase(); jobs=jobs.filter(j=>(j.title+" "+j.company+" "+(j.tags||[]).join(" ")).toLowerCase().includes(q)); }
+    }else{
+      jobs=jobs.filter(j=>!j.relocate);                 // main board stays remote-only
+      jobs=jobs.filter(passesCuration);                 // curation gate: high pay / senior / no junk
+      if(latamOnly) jobs=jobs.filter(j=>j._latam===1);
+      jobs=jobs.filter(j=>catMatch(j,activeCat));
+      if(query){ const q=query.toLowerCase(); jobs=jobs.filter(j=>(j.title+" "+j.company+" "+(j.tags||[]).join(" ")).toLowerCase().includes(q)); }
+    }
+    if(directOnly||CONFIG.DIRECT_APPLY_ONLY) jobs=jobs.filter(j=>j.direct);
+    // order: editorial pins → direct-apply → salary-disclosed → best score → newest
+    const hasSal = j => (j._sal>0?1:0);
+    if(cvLoaded && matchSort) jobs.sort((a,b)=> (b._match-a._match) || (b._score-a._score) || (new Date(b.created)-new Date(a.created)));
+    else jobs.sort((a,b)=> (b._pin-a._pin) || ((b.direct?1:0)-(a.direct?1:0)) || (hasSal(b)-hasSal(a)) || (b._score-a._score) || (new Date(b.created)-new Date(a.created)));
+    pool = jobs.slice(0, CONFIG.MAX_JOBS);   // overall ceiling
   }
-  if(directOnly||CONFIG.DIRECT_APPLY_ONLY) jobs=jobs.filter(j=>j.direct);
-  // order: editorial pins → direct-apply → salary-disclosed → best score → newest
-  const hasSal = j => (j._sal>0?1:0);
-  if(cvLoaded && matchSort) jobs.sort((a,b)=> (b._match-a._match) || (b._score-a._score) || (new Date(b.created)-new Date(a.created)));
-  else jobs.sort((a,b)=> (b._pin-a._pin) || ((b.direct?1:0)-(a.direct?1:0)) || (hasSal(b)-hasSal(a)) || (b._score-a._score) || (new Date(b.created)-new Date(a.created)));
-  const pool = jobs.slice(0, CONFIG.MAX_JOBS);   // overall ceiling
   const visible = pool.slice(0, shown);          // current page window (25 at a time)
 
   document.getElementById("result-count").textContent = t("results")(pool.length);
@@ -920,6 +947,34 @@ document.getElementById("cv-file").addEventListener("change",async e=>{
 });
 document.getElementById("cv-clear").addEventListener("click",clearCV);
 document.getElementById("match-sort").addEventListener("change",e=>{ matchSort=e.target.checked; shown=CONFIG.PAGE_SIZE; render(); });
+
+/* ================= Dream Job search (precise, category-gated) ================= */
+const DREAM_STOP=new Set(("a an the for in at of to as with and or my me i we you your want wanting looking look seek seeking dream ideal role roles job jobs position positions work working remote onsite hybrid please that this be being get find some any new great good really very like into on off it its about around near using use within per startup company team".split(/\s+/)));
+function tokensOf(s){ return [...new Set((s||"").toLowerCase().replace(/[^a-z0-9+.# ]/g," ").split(/\s+/).filter(w=>w.length>2 && !DREAM_STOP.has(w)))]; }
+function shingles(tok){ const o=[]; for(let i=0;i<tok.length-1;i++) o.push(tok[i]+" "+tok[i+1]); return o; }
+function dreamScore(job,qtok,qshin,qcat,qskills){
+  const title=(job.title||"").toLowerCase();
+  if(qcat!=="other" && primaryCategory(job.title)!==qcat) return 0;   // domain gate (designer ≠ database designer)
+  let s=0, phrase=false;
+  for(const ph of qshin){ if(title.includes(ph)){ s+=100; phrase=true; } }
+  const hit=qtok.filter(w=>wordHit(title,w)).length;
+  if(qtok.length) s+=(hit/qtok.length)*60;
+  if(hit===0 && !phrase) return 0;                                   // role word must be in the title
+  const jh=(title+" "+(job.tags||[]).join(" ")+" "+stripHtml(job.description||"")).toLowerCase();
+  s += qskills.filter(k=>wordHit(jh,k)).length*12;
+  if(cvLoaded){ const m=(job._match!=null?job._match:jobMatchPct(job)); s+=m*0.2; }
+  return s;
+}
+function showDreamBanner(q,n){
+  const b=document.getElementById("dream-banner"); if(!b) return; b.hidden=false; const es=LANG==="es";
+  b.innerHTML=`<div class="dreamb">★ <strong>${n}</strong>&nbsp;${es?"coincidencias para":"matches for"} “${esc(q)}”<button id="dream-clear">${es?"limpiar ✕":"clear ✕"}</button></div>`;
+  const c=document.getElementById("dream-clear"); if(c) c.onclick=clearDream;
+}
+function hideDreamBanner(){ const b=document.getElementById("dream-banner"); if(b) b.hidden=true; }
+function clearDream(){ dreamOn=false; dreamQuery=""; const di=document.getElementById("dream-input"); if(di) di.value=""; shown=CONFIG.PAGE_SIZE; render(); }
+function runDream(){ const v=document.getElementById("dream-input").value.trim(); if(!v){ clearDream(); return; } dreamQuery=v; dreamOn=true; shown=CONFIG.PAGE_SIZE; render(); const j=document.getElementById("jobs"); if(j) j.scrollIntoView({behavior:"smooth"}); }
+document.getElementById("dream-go").addEventListener("click",runDream);
+document.getElementById("dream-input").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); runDream(); } });
 
 document.getElementById("year").textContent=new Date().getFullYear();
 /* Pay it forward — shows only when you set CONFIG.PATREON */
