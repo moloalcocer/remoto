@@ -222,6 +222,21 @@
   .cv-skills{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-start;max-width:100%}
   .cv-skills .tag{background:var(--jade-soft);color:var(--jade);border-color:transparent}
   .cv-clear{background:none;border:0;color:var(--muted);font:inherit;font-size:13px;cursor:pointer;text-decoration:underline}
+  .tag.featured{color:var(--ink);background:#F5C542;border-color:#F5C542;font-weight:700}
+  .payf{background:linear-gradient(120deg,var(--jade-soft),var(--paper-2));border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .payf .wrap{padding:40px 22px;display:flex;align-items:center;gap:24px;justify-content:space-between;flex-wrap:wrap}
+  .payf h2{font-size:clamp(22px,3vw,30px);max-width:22ch}
+  .payf p{color:var(--ink-soft);font-size:15px;max-width:56ch;margin:8px 0 0}
+  .res .wrap{padding:56px 22px}
+  .res h2{font-size:clamp(24px,3.6vw,34px)}
+  .res .lead{color:var(--ink-soft);margin:10px 0 26px;max-width:60ch}
+  .res-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+  .res-card{border:1px solid var(--line);border-radius:var(--radius);padding:22px;background:var(--paper);display:flex;flex-direction:column;text-decoration:none;color:inherit;transition:border-color .15s,transform .08s}
+  .res-card:hover{border-color:var(--rosa);transform:translateY(-2px)}
+  .res-card h3{font-size:18px}
+  .res-card p{font-size:14px;color:var(--ink-soft);margin:8px 0 16px;flex:1}
+  .res-card .go{font-size:14px;font-weight:700;color:var(--rosa)}
+  .res-note{font-size:12.5px;color:var(--muted);margin-top:18px}
 </style>
 </head>
 <body>
@@ -364,6 +379,25 @@
   </div>
 </section>
 
+<section class="payf" id="payf" hidden>
+  <div class="wrap">
+    <div>
+      <h2 data-i18n="pf_h">Got hired through Remoto? Pay it forward.</h2>
+      <p data-i18n="pf_sub">Remoto is free and always will be. If it helped you land a role, chip in whatever you can so we can keep it running — and help the next person find theirs.</p>
+    </div>
+    <a class="btn btn-primary" id="payf-btn" href="#" target="_blank" rel="noopener" data-i18n="pf_btn">Pay it forward</a>
+  </div>
+</section>
+
+<section class="res" id="res">
+  <div class="wrap">
+    <h2 data-i18n="res_h">Land the role — and thrive in it</h2>
+    <p class="lead" data-i18n="res_sub">Tools we rate for Latin American talent working with global companies.</p>
+    <div class="res-grid" id="res-grid"></div>
+    <p class="res-note" data-i18n="res_note">Some links are affiliate links that support Remoto at no extra cost to you.</p>
+  </div>
+</section>
+
 <section style="border-top:1px solid var(--line);background:var(--paper-2)">
   <div class="wrap" style="padding:40px 22px">
     <h2 style="font-size:22px;margin-bottom:16px" data-i18n="browse_h">Browse by role</h2>
@@ -404,7 +438,16 @@ const CONFIG = {
   DIRECT_APPLY_ONLY: false, // true = only show roles you apply to on the company's own site (no third-party job sites)
   MAX_JOBS:      100,     // absolute ceiling the board will ever show
   BLOCK:         [],      // words/companies to always exclude, e.g. ["crypto","staffing","commission"]
-  PIN:           []       // words/companies to always float to the top, e.g. ["Stripe","Notion","Linear"]
+  PIN:           [],      // words/companies to always float to the top (your paid "Featured" employers), e.g. ["Stripe","Notion"]
+
+  /* ---- Monetization ---- */
+  PATREON: "",   // your Patreon / tip / donate link for the "Pay it forward" button (leave "" to hide the button)
+  RESOURCES: [   // Resources section — replace each url with your affiliate/referral link; edit freely
+    { title:"Get paid from abroad", desc:"Low-fee ways to receive USD/EUR from global employers — Wise, Payoneer, Deel.", url:"#", cta:"Compare" },
+    { title:"Level up your English", desc:"Fluency is the #1 gate for LatAm remote hiring. Courses and daily practice that work.", url:"#", cta:"Learn more" },
+    { title:"Ace the remote interview", desc:"Interview prep and mock-interview tools tuned for distributed teams.", url:"#", cta:"Prepare" },
+    { title:"Set up as a contractor", desc:"Invoicing, contracts and taxes for working with companies overseas.", url:"#", cta:"Get started" }
+  ]
 };
 
 /* ============================================================
@@ -453,7 +496,7 @@ const I18N = {
     f_company:"Company", f_role:"Role title", f_link:"Application link", f_email:"Your email", f_details:"Role details (salary, stack, timezone)", f_submit:"Submit listing",
     f_note:"Opens your email app with everything filled in — just hit send.",
     al_h2:"Get the week’s best roles by email", al_p:"A short weekly digest of the top remote jobs open to LatAm talent. No spam.", al_cta:"Subscribe",
-    ft_tag:"Remote jobs for Latin American talent", ft_credit:"Live roles via Arbeitnow, Remotive & Jobicy", browse_h:"Browse by role",
+    ft_tag:"Remote jobs for Latin American talent", ft_credit:"Live roles via Arbeitnow, Remotive & Jobicy", browse_h:"Browse by role", featured_badge:"Featured", pf_h:"Got hired through Remoto? Pay it forward.", pf_sub:"Remoto is free and always will be. If it helped you land a role, chip in whatever you can so we can keep it running — and help the next person find theirs.", pf_btn:"Pay it forward", res_h:"Land the role — and thrive in it", res_sub:"Tools we rate for Latin American talent working with global companies.", res_note:"Some links are affiliate links that support Remoto at no extra cost to you.",
     latam_badge:"LatAm-friendly", apply:"Apply →", posted:"Posted", results:(n)=>`${n} curated roles`, none_h:"No roles match that yet",
     none_p:"Try a different search or turn off the LatAm-only filter.", updated:(t)=>`updated ${t}`, err_h:"Couldn’t reach the job feeds",
     err_p:"This page loads live jobs over the network. Host it (or serve it locally) and it’ll fill right up. Tap refresh to try again." },
@@ -473,7 +516,7 @@ const I18N = {
     f_company:"Empresa", f_role:"Puesto", f_link:"Enlace para postularse", f_email:"Tu correo", f_details:"Detalles (salario, stack, zona horaria)", f_submit:"Enviar vacante",
     f_note:"Abre tu correo con todo listo — solo dale enviar.",
     al_h2:"Recibe las mejores vacantes por correo", al_p:"Un resumen semanal de los mejores empleos remotos abiertos a talento LatAm. Sin spam.", al_cta:"Suscribirme",
-    ft_tag:"Empleos remotos para talento latinoamericano", ft_credit:"Vacantes en vivo vía Arbeitnow, Remotive y Jobicy", browse_h:"Explora por rol",
+    ft_tag:"Empleos remotos para talento latinoamericano", ft_credit:"Vacantes en vivo vía Arbeitnow, Remotive y Jobicy", browse_h:"Explora por rol", featured_badge:"Destacada", pf_h:"¿Conseguiste empleo con Remoto? Págalo hacia adelante.", pf_sub:"Remoto es gratis y siempre lo será. Si te ayudó a conseguir trabajo, aporta lo que puedas para mantenerlo — y ayudar a que la siguiente persona encuentre el suyo.", pf_btn:"Pagar hacia adelante", res_h:"Consigue el puesto — y triunfa en él", res_sub:"Herramientas que recomendamos para talento latinoamericano en empresas globales.", res_note:"Algunos enlaces son de afiliado y apoyan a Remoto sin costo extra para ti.",
     latam_badge:"Abierta a LatAm", apply:"Postularme →", posted:"Publicado", results:(n)=>`${n} vacantes seleccionadas`, none_h:"Aún no hay vacantes que coincidan",
     none_p:"Prueba otra búsqueda o desactiva el filtro de solo-LatAm.", updated:(t)=>`actualizado ${t}`, err_h:"No se pudo conectar con las fuentes",
     err_p:"Esta página carga vacantes en vivo por internet. Súbela a un hosting (o sírvela localmente) y se llenará. Toca actualizar para reintentar." }
@@ -604,9 +647,10 @@ function catMatch(j,cat){
 
 /* ---------- curation: pay + seniority + no junk ---------- */
 function parseSalary(job){
-  const txt=((job.salary||"")+" "+(job.title||"")+" "+stripHtml(job.description||"")).toLowerCase();
+  let txt=((job.salary||"")+" "+(job.title||"")+" "+stripHtml(job.description||"")).toLowerCase();
+  txt=txt.replace(/\b(401|403|457)\s?\(?\s?[kb]\)?/g," ");   // ignore 401(k)/403(b)/457 retirement mentions
   let best=0;
-  (txt.match(/\$?\s?(\d{2,3})\s?k\b/g)||[]).forEach(m=>{ const n=parseInt(m.replace(/[^\d]/g,""),10)*1000; if(n>best) best=n; });
+  (txt.match(/\$?\s?(\d{2,3})\s?k\b/g)||[]).forEach(m=>{ const n=parseInt(m.replace(/[^\d]/g,""),10); if(n>=30&&n<=900){ const v=n*1000; if(v>best) best=v; } });
   (txt.match(/\$\s?\d{2,3}(?:[,\.]\d{3})+/g)||[]).forEach(m=>{ const n=parseInt(m.replace(/[^\d]/g,""),10); if(n>=30000&&n<=1000000&&n>best) best=n; });
   (txt.match(/\$\s?(\d{2,3})(?:\.\d+)?\s?(?:\/\s?hr|\/\s?hour|per hour|hourly|\/h\b)/g)||[]).forEach(m=>{ const n=parseInt(m.replace(/[^\d]/g,""),10)*2080; if(n>best) best=n; });
   return best;
@@ -683,13 +727,14 @@ function render(){
     const badge = friendly?`<span class="tag latam">${esc(t("latam_badge"))}</span>`:"";
     const direct = j.direct?`<span class="tag direct">${esc(t("direct_badge"))}</span>`:"";
     const match = cvLoaded?`<span class="tag match ${j._match>=70?'hi':j._match>=40?'mid':'lo'}">${j._match}% ${LANG==="es"?"afín":"match"}</span>`:"";
+    const feat = j._pin?`<span class="tag featured">★ ${esc(t("featured_badge"))}</span>`:"";
     const applyTxt = j.direct?t("apply_direct"):t("apply");
     return `<a class="job" href="${esc(j.url)}" target="_blank" rel="noopener">
       <div class="logo">${esc(initials(j.company))}${j.domain?`<img src="https://logo.clearbit.com/${esc(j.domain)}" alt="" loading="lazy" onerror="if(!this.dataset.f){this.dataset.f='1';this.src='https://www.google.com/s2/favicons?domain=${esc(j.domain)}&sz=64'}else{this.style.display='none'}">`:""}</div>
       <div>
         <h3>${esc(j.title)}</h3>
         <div class="co">${esc(j.company)}${j.location?` · ${esc(j.location)}`:""}</div>
-        <div class="tags">${match}${direct}${badge}${sal}${tags}</div>
+        <div class="tags">${feat}${match}${direct}${badge}${sal}${tags}</div>
       </div>
       <div class="side"><span class="apply">${esc(applyTxt)}</span><span>${esc(timeAgo(j.created))}</span></div>
     </a>`;
@@ -877,6 +922,12 @@ document.getElementById("cv-clear").addEventListener("click",clearCV);
 document.getElementById("match-sort").addEventListener("change",e=>{ matchSort=e.target.checked; shown=CONFIG.PAGE_SIZE; render(); });
 
 document.getElementById("year").textContent=new Date().getFullYear();
+/* Pay it forward — shows only when you set CONFIG.PATREON */
+(function(){ const b=document.getElementById("payf-btn"), band=document.getElementById("payf");
+  if(b&&band&&CONFIG.PATREON){ b.href=CONFIG.PATREON; band.hidden=false; } })();
+/* Resources (edit CONFIG.RESOURCES) */
+(function(){ const g=document.getElementById("res-grid"); if(!g) return;
+  g.innerHTML=(CONFIG.RESOURCES||[]).map(r=>`<a class="res-card" href="${esc(r.url||'#')}" target="_blank" rel="noopener sponsored"><h3>${esc(r.title||'')}</h3><p>${esc(r.desc||'')}</p><span class="go">${esc(r.cta||'Learn more')} →</span></a>`).join(""); })();
 document.title = `${CONFIG.BOARD_NAME} — ${LANG==="es"?"Empleos remotos para talento latinoamericano":"Remote jobs for top Latin American talent"}`;
 applyLang();
 load();
