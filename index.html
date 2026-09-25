@@ -441,6 +441,8 @@ const CONFIG = {
   DOMAIN:       "https://YOURDOMAIN.com",// your live URL (for links/SEO)
   PAYMENT_LINK: "",                      // optional: Stripe/Gumroad/PayPal link for paid posts
   FORMSPREE:    "",                      // optional: a free formspree.io endpoint for a real inbox instead of mailto
+  ADZUNA_PROXY: "remoto-adzuna.molo-alcocer.workers.dev",                      // your Cloudflare Worker URL (widens Dream search to every industry). Leave "" to disable.
+  ADZUNA_COUNTRY: "na-eu",               // Dream-search regions: "na-eu" (North America + Europe), "na", "eu", or a list like "us,ca,gb,de"
 
   /* ---- Curation: keep it crème de la crème, never a firehose ---- */
   MIN_SALARY:    100000,  // drop any role whose detectable pay is below this (USD/yr)
@@ -982,20 +984,32 @@ function showDreamBanner(q,n,web){
 function hideDreamBanner(){ const b=document.getElementById("dream-banner"); if(b) b.hidden=true; }
 function clearDream(){ dreamOn=false; dreamQuery=""; dreamExtra=[]; const di=document.getElementById("dream-input"); if(di) di.value=""; shown=CONFIG.PAGE_SIZE; render(); }
 function runDream(){ const v=document.getElementById("dream-input").value.trim(); if(!v){ clearDream(); return; } dreamQuery=v; dreamOn=true; dreamExtra=[]; shown=CONFIG.PAGE_SIZE; render(); const j=document.getElementById("jobs"); if(j) j.scrollIntoView({behavior:"smooth"}); expandDream(v); }
-/* If the curated set is thin, search the wider remote-jobs index (Remotive) by keyword and fold in precise matches only. */
+/* If the curated set is thin, search the wider indexes (Remotive always; Adzuna—every industry—if a proxy is set) and fold in precise matches only. */
+const isRem=s=>/(^|[^a-z])(remote|virtual|anywhere|work from home|wfh)([^a-z]|$)/i.test(s||"");
 async function expandDream(q){
   const kw=tokensOf(q).slice(0,5).join(" "); if(!kw) return;
+  const qtok=tokensOf(q), qshin=shingles(qtok), qcat=primaryCategory(q), qskills=extractSkills(q).concat(cvLoaded?[...cvSkills]:[]);
+  const have=new Set(ALL_JOBS.map(x=>(x.company+"|"+x.title).toLowerCase().replace(/\s+/g," ").trim()));
+  const sources=[
+    fetch("https://remotive.com/api/remote-jobs?search="+encodeURIComponent(kw)).then(r=>r.ok?r.json():{jobs:[]}).then(j=>(j.jobs||[]).map(x=>({
+      id:"rmw-"+x.id, title:x.title, company:x.company_name, url:x.url, remote:true, relocate:false, direct:false, web:true,
+      location:x.candidate_required_location||"", tags:x.tags||[], description:x.description||"", created:x.publication_date||new Date().toISOString(), salary:x.salary||"", domain:"" }))).catch(()=>[])
+  ];
+  if(CONFIG.ADZUNA_PROXY){
+    const c=CONFIG.ADZUNA_COUNTRY||"us";
+    sources.push(fetch(`${CONFIG.ADZUNA_PROXY}?what=${encodeURIComponent(kw)}&country=${encodeURIComponent(c)}`).then(r=>r.ok?r.json():{results:[]}).then(j=>(j.results||[]).map(x=>({
+      id:"az-"+x.id, title:x.title, company:(x.company&&x.company.display_name)||"Company", url:x.redirect_url, web:true, direct:false, relocate:false,
+      remote:isRem((x.title||"")+" "+((x.location&&x.location.display_name)||"")+" "+(x.description||"")),
+      location:(x.location&&x.location.display_name)||"", tags:x.category?[x.category.label]:[], description:x.description||"",
+      created:x.created||new Date().toISOString(), salary:(x.salary_min&&x.salary_max)?`$${Math.round(x.salary_min/1000)}k–$${Math.round(x.salary_max/1000)}k`:"", domain:"" }))).catch(()=>[]));
+  }
   try{
-    const r=await fetch("https://remotive.com/api/remote-jobs?search="+encodeURIComponent(kw));
-    if(!r.ok) return; const j=await r.json();
+    const arrs=await Promise.all(sources);
     if(!(dreamOn && dreamQuery.trim()===q.trim())) return;   // user moved on
-    const have=new Set(ALL_JOBS.map(x=>(x.company+"|"+x.title).toLowerCase().replace(/\s+/g," ").trim()));
-    const qtok=tokensOf(q), qshin=shingles(qtok), qcat=primaryCategory(q), qskills=extractSkills(q).concat(cvLoaded?[...cvSkills]:[]);
-    const found=(j.jobs||[]).map(x=>({ id:"rmw-"+x.id, title:x.title, company:x.company_name, url:x.url, remote:true, relocate:false, direct:false, web:true,
-        location:x.candidate_required_location||"", tags:x.tags||[], description:x.description||"", created:x.publication_date||new Date().toISOString(), salary:x.salary||"", domain:"" }))
-      .filter(x=>x.title&&x.company&&!have.has((x.company+"|"+x.title).toLowerCase().replace(/\s+/g," ").trim()))
+    const seen=new Set(have);
+    const found=[].concat(...arrs).filter(x=>{ if(!x.title||!x.company) return false; const k=(x.company+"|"+x.title).toLowerCase().replace(/\s+/g," ").trim(); if(seen.has(k)) return false; seen.add(k); return true; })
       .filter(x=> dreamScore(x,qtok,qshin,qcat,qskills)>=45)
-      .slice(0,40);
+      .slice(0,60);
     if(found.length){ dreamExtra=found; render(); }
   }catch(e){}
 }
