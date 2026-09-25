@@ -441,7 +441,7 @@ const CONFIG = {
   DOMAIN:       "https://YOURDOMAIN.com",// your live URL (for links/SEO)
   PAYMENT_LINK: "",                      // optional: Stripe/Gumroad/PayPal link for paid posts
   FORMSPREE:    "",                      // optional: a free formspree.io endpoint for a real inbox instead of mailto
-  ADZUNA_PROXY: "remoto-adzuna.molo-alcocer.workers.dev",                      // your Cloudflare Worker URL (widens Dream search to every industry). Leave "" to disable.
+  ADZUNA_PROXY: "",                      // your Cloudflare Worker URL (widens Dream search to every industry). Leave "" to disable.
   ADZUNA_COUNTRY: "na-eu",               // Dream-search regions: "na-eu" (North America + Europe), "na", "eu", or a list like "us,ca,gb,de"
 
   /* ---- Curation: keep it crème de la crème, never a firehose ---- */
@@ -477,7 +477,8 @@ const CATEGORIES = [
   { id:"data",    en:"Data",             es:"Datos",            match:["data","analyst","analytics","machine learning","ml","ai","scientist","datos"] },
   { id:"creative",en:"Creative",         es:"Creativos",        match:["game designer","game developer","game artist","game programmer","gameplay","gamedev","video game","gaming","unity","unreal","animator","animation","3d artist","3d modeler","3d generalist","vfx","motion designer","motion graphics","art director","concept artist","concept art","illustrator","storyboard","character artist","character designer","level designer","environment artist","video editor","video producer","cinematographer","colorist","compositor","creative director","creative producer","post-production","narrative designer","sound designer","technical artist","filmmaker"] },
   { id:"finance", en:"Finance",          es:"Finanzas",         match:["finance","financial","accounting","controller","fp&a","treasury","investment","tax","audit","banking","cfo","equity research","portfolio"] },
-  { id:"product", en:"Product",          es:"Producto",         match:["product manager","product owner","head of product","product lead","program manager","technical product","product management","group product"] }
+  { id:"product", en:"Product",          es:"Producto",         match:["product manager","product owner","head of product","product lead","program manager","technical product","product management","group product"] },
+  { id:"arch",    en:"Architecture",     es:"Arquitectura",     match:null }
 ];
 
 /* Signals that a remote role is open to LatAm / the Americas / bilingual talent. */
@@ -640,7 +641,8 @@ function wordHit(hay,kw){
 const CLASSIFY = [
   ["creative", ["animator","animation","vfx","motion designer","motion graphics","3d artist","3d modeler","3d generalist","game designer","game artist","game design","art director","concept artist","concept art","illustrator","storyboard","character artist","character designer","level designer","environment artist","video editor","video producer","cinematographer","colorist","compositor","creative director","creative producer","narrative designer","sound designer","technical artist","filmmaker"]],
   ["data", ["data scientist","data engineer","data analyst","analytics engineer","machine learning","ml engineer","ai engineer","data science","business intelligence","bi analyst","analytics"]],
-  ["eng", ["software engineer","engineer","developer","database","dba","sql developer","back end","backend","front end","frontend","full stack","fullstack","full-stack","devops","programmer","sre","site reliability","mobile engineer","ios","android","platform engineer","qa engineer","security engineer","game developer","game programmer","gameplay","architect","engineering manager"]],
+  ["eng", ["software engineer","engineer","developer","database","dba","sql developer","back end","backend","front end","frontend","full stack","fullstack","full-stack","devops","programmer","sre","site reliability","mobile engineer","ios","android","platform engineer","qa engineer","security engineer","game developer","game programmer","gameplay","software architect","solutions architect","cloud architect","data architect","enterprise architect","systems architect","security architect","technical architect","engineering manager"]],
+  ["arch", ["architectural designer","project architect","design architect","architectural","landscape architect","interior architect","urban designer","urban planner","architectural technologist","bim manager","revit","architect"]],
   ["product", ["product manager","product owner","head of product","product lead","product management","program manager","technical product manager","group product manager","director of product","vp product"]],
   ["design", ["ux designer","ui designer","ux/ui","product designer","graphic designer","web designer","brand designer","visual designer","design lead","design director","design manager","ux researcher","user researcher","design system","designer"]],
   ["finance", ["financial analyst","finance manager","finance","accounting","accountant","controller","fp&a","treasury","investment","tax","audit","auditor","banking","cfo","equity research","portfolio manager","underwriter","bookkeeper"]],
