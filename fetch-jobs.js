@@ -80,6 +80,17 @@ const COMPANIES = [
   { name:"Skydance",   ats:"lever", token:"skydance",  domain:"skydance.com" },
   { name:"Canva",      ats:"lever", token:"canva",     domain:"canva.com" },
 
+  // ---- Elite design / creative / media / brand (lifts those sections to eng/data level) ----
+  { name:"ElevenLabs", ats:"ashby",      token:"elevenlabs", domain:"elevenlabs.io" },
+  { name:"Mural",      ats:"ashby",      token:"mural",      domain:"mural.co" },
+  { name:"Reddit",     ats:"ashby",      token:"reddit",     domain:"reddit.com" },
+  { name:"Lemonade",   ats:"ashby",      token:"lemonade",   domain:"lemonade.com" },
+  { name:"Clay",       ats:"ashby",      token:"clay",       domain:"clay.com" },
+  { name:"Ironclad",   ats:"ashby",      token:"ironclad",   domain:"ironclad.com" },
+  { name:"Airbyte",    ats:"ashby",      token:"airbyte",    domain:"airbyte.com" },
+  { name:"Vercel",     ats:"greenhouse", token:"vercel",     domain:"vercel.com" },
+  { name:"ClickHouse", ats:"greenhouse", token:"clickhouse", domain:"clickhouse.com" },
+
   // ---- Workable (token = slug in apply.workable.com/<token>) ----
   { name:"Hugging Face",    ats:"workable", token:"huggingface",    domain:"huggingface.co" },
   { name:"Square Enix",     ats:"workable", token:"squareenix",     domain:"square-enix.com" },
