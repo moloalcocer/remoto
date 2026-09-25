@@ -79,6 +79,12 @@ const COMPANIES = [
   { name:"Behaviour Interactive", ats:"lever", token:"behaviourinteractive", domain:"behaviour.com" },
   { name:"Skydance",   ats:"lever", token:"skydance",  domain:"skydance.com" },
   { name:"Canva",      ats:"lever", token:"canva",     domain:"canva.com" },
+  { name:"Crytek",     ats:"lever", token:"crytek",    domain:"crytek.com" },
+  { name:"HoYoverse",  ats:"smartrecruiters", token:"HoYoverse", domain:"hoyoverse.com" },
+  { name:"Unity",      ats:"greenhouse", token:"unity3d", domain:"unity.com" },
+
+  // ---- Ad agencies & film run on holding-company Workday boards (onsite → relocate tab). Paste a careers URL to add more. ----
+  { name:"Omnicom (agencies)", ats:"workday", url:"https://interpublic.wd5.myworkdayjobs.com/OMC", domain:"omnicomgroup.com" },
 
   // ---- Elite design / creative / media / brand (lifts those sections to eng/data level) ----
   { name:"ElevenLabs", ats:"ashby",      token:"elevenlabs", domain:"elevenlabs.io" },
