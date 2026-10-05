@@ -276,27 +276,29 @@ function diversify(list, perCompany, total){
 }
 
 (async()=>{
-  const [aggArr, companyArr] = await Promise.all([
-    Promise.all([arbeitnow(), remotive(), jobicy()]).then(r=>[].concat(...r)),
-    sourceCompanies()
-  ]);
+  // CRÈME-DE-LA-CRÈME POLICY: the board is sourced ONLY from the curated roster of
+  // great companies (direct ATS feeds). The generic aggregators (Arbeitnow/Remotive/
+  // Jobicy) are deliberately NOT used here — they're the recycled listings every other
+  // site shows. They live only inside Dream search, where a wide net is wanted on demand.
+  const companyArr = await sourceCompanies();
 
-  // Remote company roles enrich the main board; onsite roster roles feed the relocate tab.
+  // Remote company roles → main board; onsite roster roles → relocate tab.
   const remoteCompany = companyArr.filter(j=>j.remote);
-  const onsite        = companyArr.filter(j=>!j.remote);   // all onsite roster roles (relocate tab)
+  const onsite        = companyArr.filter(j=>!j.remote);
 
-  let main = dedupe([].concat(aggArr, remoteCompany).filter(keep));
+  let main = dedupe(remoteCompany.filter(keep));
   main.forEach(j=>j.relocate=false);
-  main.sort((a,b)=> ((b.direct?1:0)-(a.direct?1:0)) || scoreOf(b)-scoreOf(a) || new Date(b.created)-new Date(a.created));
-  main = diversify(main, 6, 260);   // at most 6 per company → wide variety, real depth per sector
+  main.sort((a,b)=> scoreOf(b)-scoreOf(a) || new Date(b.created)-new Date(a.created));
+  main = diversify(main, 8, 300);   // every role is direct-from-a-great-company
 
   let relocate = dedupe(onsite.filter(j=>!isJunk(j)));
   relocate.forEach(j=>j.relocate=true);
   relocate.sort((a,b)=> scoreOf(b)-scoreOf(a) || new Date(b.created)-new Date(a.created));
-  relocate = diversify(relocate, 8, 140);
+  relocate = diversify(relocate, 8, 160);
 
   const outAll = main.concat(relocate);
   fs.writeFileSync("jobs.json", JSON.stringify(outAll));
   const cos = new Set(outAll.map(j=>j.company)).size;
   console.log(`Wrote ${main.length} remote + ${relocate.length} relocation roles from ${cos} companies to jobs.json`);
+  console.log("--- per-company counts (0 = fix this company's token) ---");
 })();
