@@ -97,6 +97,13 @@ const COMPANIES = [
   { name:"Vercel",     ats:"greenhouse", token:"vercel",     domain:"vercel.com" },
   { name:"ClickHouse", ats:"greenhouse", token:"clickhouse", domain:"clickhouse.com" },
 
+  // ---- Verified this session: AI-creative / media / creator-economy (strong Creative, Design & Marketing) ----
+  { name:"Midjourney", ats:"ashby", token:"midjourney",   domain:"midjourney.com" },   // AI art & design
+  { name:"Suno",       ats:"ashby", token:"suno",         domain:"suno.com" },          // AI music
+  { name:"Patreon",    ats:"ashby", token:"patreon",      domain:"patreon.com" },       // creator economy
+  { name:"Harvey",     ats:"ashby", token:"harvey",       domain:"harvey.ai" },         // legal AI (prestige)
+  { name:"a16z New Media", ats:"ashby", token:"a16z-new-media", domain:"a16z.com" },    // media
+
   // ---- Workable (token = slug in apply.workable.com/<token>) ----
   { name:"Hugging Face",    ats:"workable", token:"huggingface",    domain:"huggingface.co" },
   { name:"Square Enix",     ats:"workable", token:"squareenix",     domain:"square-enix.com" },
