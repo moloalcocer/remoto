@@ -60,8 +60,8 @@
   const CLASSIFY=[
     ["creative",["animator","animation","vfx","motion designer","motion graphics","3d artist","3d modeler","3d generalist","game designer","game artist","game design","art director","concept artist","concept art","illustrator","storyboard","character artist","character designer","level designer","environment artist","video editor","video producer","cinematographer","colorist","compositor","creative director","creative producer","narrative designer","sound designer","technical artist","filmmaker"]],
     ["data",["data scientist","data engineer","data analyst","analytics engineer","machine learning","ml engineer","ai engineer","data science","business intelligence","bi analyst","analytics"]],
-    ["eng",["software engineer","engineer","developer","database","dba","sql developer","back end","backend","front end","frontend","full stack","fullstack","full-stack","devops","programmer","sre","site reliability","mobile engineer","ios","android","platform engineer","qa engineer","security engineer","game developer","game programmer","gameplay","software architect","solutions architect","cloud architect","data architect","enterprise architect","systems architect","security architect","technical architect","engineering manager"]],
-    ["arch",["architectural designer","project architect","design architect","architectural","landscape architect","interior architect","urban designer","urban planner","architectural technologist","bim manager","revit","architect"]],
+    ["arch",["architectural designer","project architect","landscape architect","interior architect","urban designer","urban planner","architectural technologist","registered architect","job captain","architectural","revit","bim manager"]],
+    ["eng",["software engineer","engineer","developer","database","dba","sql developer","back end","backend","front end","frontend","full stack","fullstack","full-stack","devops","programmer","sre","site reliability","mobile engineer","ios","android","platform engineer","qa engineer","security engineer","game developer","game programmer","gameplay","architect","engineering manager"]],
     ["product",["product manager","product owner","head of product","product lead","product management","program manager","technical product manager","group product manager","director of product","vp product"]],
     ["design",["ux designer","ui designer","ux/ui","product designer","graphic designer","web designer","brand designer","visual designer","design lead","design director","design manager","ux researcher","user researcher","design system","designer"]],
     ["finance",["financial analyst","finance manager","finance","accounting","accountant","controller","fp&a","treasury","investment","tax","audit","auditor","banking","cfo","equity research","portfolio manager","underwriter","bookkeeper"]],
@@ -104,8 +104,7 @@
 
   async function load(){
     const box=document.getElementById("jobs"); if(box) box.innerHTML=`<div class="state">${esc(T.loading)}</div>`;
-    const r=await Promise.all([feedCache(),feedArbeitnow(),feedRemotive(),feedJobicy()]);
-    ALL=dedupe([].concat(...r));
+    ALL=dedupe(await feedCache());   // curated-only: roster cache, no generic aggregators
     if(!ALL.length){if(box)box.innerHTML=`<div class="state">${esc(T.err)}</div>`;return;}
     const u=document.getElementById("updated");
     if(u)u.textContent=T.updated(new Date().toLocaleTimeString(N.lang==="es"?"es-MX":"en-US",{hour:"2-digit",minute:"2-digit"}));
