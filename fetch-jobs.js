@@ -246,13 +246,20 @@ async function sourceCompanies(){
 }
 
 /* ---------- free remote feeds ---------- */
+/* Arbeitnow only lists European employers: tag every location as Europe so the
+   region filter can find it ("Remote job", "Homeoffice", small towns, etc.). */
+function anLocation(loc){
+  loc=(loc||"").trim();
+  if(!loc || /^(remote( job)?|homeoffice|home office|werken op afstand|télétravail|teletrabajo|fernarbeit)$/i.test(loc)) return "Remote (Europe)";
+  return /europe/i.test(loc) ? loc : loc+" · Europe";
+}
 async function arbeitnow(){
   const out=[];
   for(let p=1;p<=5;p++){
     try{ const r=await fetch(`https://www.arbeitnow.com/api/job-board-api?page=${p}`); const j=await r.json();
       (j.data||[]).forEach(x=>{ if(!x.remote) return;
         out.push({ id:"an-"+x.slug, title:x.title, company:x.company_name, url:x.url, remote:true, relocate:false, direct:false,
-          location:x.location||"", tags:x.tags||[], description:x.description||"",
+          location:anLocation(x.location), tags:x.tags||[], description:x.description||"",
           created:x.created_at?new Date(x.created_at*1000).toISOString():new Date().toISOString(), salary:"", source:"Arbeitnow" }); });
     }catch(e){ console.error("arbeitnow page "+p, e.message); }
   }
