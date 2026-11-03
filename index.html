@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <!-- ============ SEO ============ -->
-<title>Remoto — Remote jobs for top Latin American talent</title>
-<meta name="description" content="Live remote job listings open to talent across Latin America. Senior engineering, customer success, sales, design and ops roles at global companies — in your timezone." />
-<meta name="keywords" content="remote jobs latin america, trabajo remoto, latam remote talent, remote jobs mexico, empleos remotos, bilingual remote jobs, nearshore talent" />
+<title>Remoto — Curated remote jobs, worldwide</title>
+<meta name="description" content="Live remote job listings at great companies, filtered by where you can actually work from — Latin America, North America, Europe, Asia-Pacific, Africa &amp; the Middle East." />
+<meta name="keywords" content="remote jobs worldwide, remote jobs europe, remote jobs latin america, trabajo remoto, latam remote talent, remote jobs mexico, empleos remotos, bilingual remote jobs, nearshore talent" />
 <meta name="robots" content="index,follow" />
 <link rel="canonical" href="https://YOURDOMAIN.com/" />
 <link rel="alternate" hreflang="en" href="https://YOURDOMAIN.com/?lang=en" />
@@ -16,8 +16,8 @@
 
 <!-- ============ Open Graph ============ -->
 <meta property="og:type" content="website" />
-<meta property="og:title" content="Remoto — Remote jobs for top Latin American talent" />
-<meta property="og:description" content="Live remote roles at global companies, open to talent across Latin America. Updated every day." />
+<meta property="og:title" content="Remoto — Curated remote jobs, worldwide" />
+<meta property="og:description" content="Live remote roles at great companies, filtered by the region you work from. Updated every day." />
 <meta property="og:url" content="https://YOURDOMAIN.com/" />
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌎</text></svg>" />
@@ -146,6 +146,10 @@
   .tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
   .tag{font-size:12px;font-weight:600;color:var(--ink-soft);background:var(--paper-2);border:1px solid var(--line);padding:3px 9px;border-radius:7px}
   .tag.latam{color:#fff;background:var(--jade);border-color:var(--jade)}
+  .tag.region{color:var(--jade);background:var(--jade-soft);border-color:transparent}
+  .region-pick{display:inline-flex;align-items:center;gap:8px;font-weight:600;color:var(--ink)}
+  .region-pick select{font:inherit;font-weight:600;color:var(--ink);background:var(--paper-2);border:1px solid var(--line);border-radius:999px;padding:5px 12px;cursor:pointer}
+  .region-pick select:focus-visible{outline:2px solid var(--rosa);outline-offset:2px}
   .tag.salary{color:var(--jade);background:var(--jade-soft);border-color:transparent}
   .tag.direct{color:#fff;background:var(--rosa);border-color:var(--rosa)}
   .side{text-align:right;font-size:13px;color:var(--muted);white-space:nowrap;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
@@ -307,10 +311,9 @@
   <div class="wrap">
     <div class="chips" id="chips"></div>
     <div class="meta">
-      <label class="switch">
-        <input type="checkbox" id="latam-only" />
-        <span class="track"></span>
-        <span data-i18n="latam_toggle">LatAm-friendly only</span>
+      <label class="region-pick">
+        <span data-i18n="region_label">Open to</span>
+        <select id="region"></select>
       </label>
       <label class="switch">
         <input type="checkbox" id="salaried-only" />
@@ -480,10 +483,67 @@ const CATEGORIES = [
   { id:"product", en:"Product",          es:"Producto",         match:["product manager","product owner","head of product","product lead","program manager","technical product","product management","group product"] }
 ];
 
-/* Signals that a remote role is open to LatAm / the Americas / bilingual talent. */
-const LATAM_SIGNALS = ["worldwide","global","anywhere","americas","latin america","latam","south america","central america","mexico","méxico","argentina","brazil","brasil","colombia","chile","peru","spanish","bilingual","español","bilingüe","emea/amer","est","cst","gmt-","utc-3","utc-4","utc-5","utc-6"];
-/* Locations that usually EXCLUDE LatAm applicants — used to demote, not hide. */
-const EXCLUDE_SIGNALS = ["us only","usa only","united states only","us-only","eu only","europe only","uk only","canada only","must be located in the us","authorized to work in the us"];
+/* ============================================================
+   REGIONS — which parts of the world a remote role is open to.
+   Read from the job's location + title (descriptions are too noisy:
+   company boilerplate lists offices everywhere). A role with no region
+   at all ("Remote") is "unspecified" and only shows under "All regions".
+   ============================================================ */
+const REGIONS = [
+  { id:"latam", en:"Latin America",          es:"Latinoamérica",          short_en:"LatAm",  short_es:"LatAm" },
+  { id:"na",    en:"US & Canada",            es:"EE. UU. y Canadá",       short_en:"US/CA",  short_es:"EE. UU./CA" },
+  { id:"eu",    en:"Europe & UK",            es:"Europa y Reino Unido",   short_en:"Europe", short_es:"Europa" },
+  { id:"apac",  en:"Asia-Pacific",           es:"Asia-Pacífico",          short_en:"APAC",   short_es:"APAC" },
+  { id:"mea",   en:"Middle East & Africa",   es:"Medio Oriente y África", short_en:"MEA",    short_es:"MEA" }
+];
+const REGION_SIGNALS = {
+  latam:["latam","latin america","south america","central america","americas","amer","mexico","méxico","cdmx","guadalajara","monterrey","argentina","buenos aires","brazil","brasil","são paulo","sao paulo","colombia","bogotá","bogota","medellín","medellin","chile","santiago","peru","perú","lima","uruguay","montevideo","costa rica","ecuador","guatemala","panama","panamá","dominican republic","puerto rico","venezuela","bolivia","paraguay","el salvador","honduras","nicaragua"],
+  na:["united states","usa","us","u.s.","u.s","north america","americas","amer","canada","new york","nyc","san francisco","sf","bay area","los angeles","seattle","austin","boston","chicago","denver","atlanta","miami","washington","california","texas","colorado","florida","toronto","vancouver","montreal","ontario","quebec","british columbia"],
+  eu:["europe","european union","eu","emea","uk","united kingdom","great britain","england","scotland","wales","london","manchester","ireland","dublin","germany","deutschland","berlin","munich","hamburg","france","paris","spain","españa","madrid","barcelona","portugal","lisbon","porto","netherlands","amsterdam","belgium","brussels","switzerland","zurich","geneva","austria","vienna","italy","milan","rome","poland","warsaw","krakow","sweden","stockholm","norway","oslo","denmark","copenhagen","finland","helsinki","iceland","czech republic","czechia","prague","romania","bucharest","greece","athens","hungary","budapest","estonia","tallinn","latvia","lithuania","croatia","serbia","belgrade","ukraine","kyiv","bulgaria","sofia","slovakia","slovenia","luxembourg","cyprus","malta","cet","cest"],
+  apac:["apac","asia","asia pacific","asia-pacific","australia","sydney","melbourne","new zealand","auckland","japan","tokyo","singapore","india","bangalore","bengaluru","hyderabad","pune","mumbai","delhi","korea","seoul","philippines","manila","indonesia","jakarta","vietnam","thailand","bangkok","malaysia","kuala lumpur","hong kong","taiwan","taipei","china","shanghai","beijing","shenzhen"],
+  mea:["emea","middle east","mena","africa","uae","united arab emirates","dubai","abu dhabi","saudi arabia","riyadh","dammam","qatar","doha","israel","tel aviv","egypt","cairo","nigeria","lagos","kenya","nairobi","south africa","cape town","johannesburg","turkey","türkiye","istanbul","morocco","jordan","bahrain","kuwait","oman"]
+};
+/* Location text that means "anywhere". */
+const GLOBAL_LOC_SIGNALS = ["worldwide","anywhere","global","globally","international","any location","all locations","fully remote - global","remote - global","remote (global)"];
+/* Description phrases strong enough to trust for "anywhere". */
+const GLOBAL_DESC_SIGNALS = ["work from anywhere","work from anywhere in the world","from anywhere in the world","open to candidates worldwide","hire worldwide","we hire globally","fully distributed team across the world"];
+/* Explicit restrictions: these OVERRIDE everything else for that role. */
+const RESTRICT_SIGNALS = [
+  ["na",["us only","usa only","united states only","us-only","u.s. only","must be located in the us","must be based in the us","must reside in the us","authorized to work in the us","authorized to work in the united states","canada only"]],
+  ["eu",["eu only","europe only","uk only","must be based in the uk","must be based in europe","right to work in the uk"]]
+];
+const tzRegion = (()=>{
+  let tz=""; try{ tz=Intl.DateTimeFormat().resolvedOptions().timeZone||""; }catch(_){}
+  const NA=/^America\/(New_York|Chicago|Denver|Los_Angeles|Phoenix|Anchorage|Juneau|Sitka|Nome|Adak|Boise|Detroit|Indiana|Kentucky|Louisville|Menominee|North_Dakota|Toronto|Vancouver|Edmonton|Winnipeg|Regina|Halifax|St_Johns|Moncton|Glace_Bay|Goose_Bay|Whitehorse|Yellowknife|Iqaluit|Rankin_Inlet|Cambridge_Bay|Dawson|Swift_Current|Fort_Nelson|Creston|Atikokan|Nipigon|Thunder_Bay|Rainy_River|Resolute|Inuvik)|^US\/|^Canada\/|^Pacific\/Honolulu/;
+  const MEA=/^Africa\/|^Asia\/(Dubai|Riyadh|Qatar|Bahrain|Kuwait|Muscat|Jerusalem|Tel_Aviv|Amman|Beirut|Damascus|Baghdad|Tehran|Gaza|Hebron|Aden|Nicosia)|^Europe\/Istanbul/;
+  if(NA.test(tz)) return "na";
+  if(/^America\//.test(tz)) return "latam";
+  if(MEA.test(tz)) return "mea";
+  if(/^Europe\/|^Atlantic\/(Reykjavik|Canary|Madeira|Azores|Faroe)/.test(tz)) return "eu";
+  if(/^Asia\/|^Australia\/|^Pacific\//.test(tz)) return "apac";
+  return "";
+})();
+/* Returns { global:bool, regions:Set } for a job. */
+function regionInfo(j){
+  if(j._ri) return j._ri;
+  const loc=((j.location||"")+" | "+(j.title||"")).toLowerCase();
+  const desc=stripHtml(j.description||"").toLowerCase();
+  const all=loc+" | "+desc;
+  const regions=new Set(); let global=false;
+  for(const [rid,phr] of RESTRICT_SIGNALS){ if(phr.some(p=>all.includes(p))){ regions.add(rid); } }
+  if(!regions.size){
+    for(const r of REGIONS){ if(REGION_SIGNALS[r.id].some(k=>wordHit(loc,k))) regions.add(r.id); }
+    const locL=(j.location||"").toLowerCase();
+    if(GLOBAL_LOC_SIGNALS.some(k=>wordHit(locL,k))) global=true;
+    // description phrases only count when the location itself names no region
+    else if(!regions.size && GLOBAL_DESC_SIGNALS.some(p=>desc.includes(p))) global=true;
+    if(wordHit(desc,"latam")||desc.includes("latin america")) regions.add("latam");
+  }
+  if(global) REGIONS.forEach(r=>regions.add(r.id));
+  return (j._ri={global,regions});
+}
+const openTo = (j,rid) => rid==="all" || regionInfo(j).regions.has(rid);
+const regionName = (rid,short) => { const r=REGIONS.find(x=>x.id===rid); return r ? (short ? r["short_"+LANG] : r[LANG]) : ""; };
 
 /* Curation signals */
 const JUNK_SIGNALS = ["junior","jr ","jr.","intern","internship","entry level","entry-level","trainee","apprentice","graduate program","graduate scheme","volunteer","unpaid","commission only","commission-only","no experience required"];
@@ -495,10 +555,10 @@ const SENIOR_SIGNALS = ["senior","sr ","sr.","lead","staff","principal","head of
 const I18N = {
   en:{ nav_post:"Post a job", hero_kicker:"Hand-curated · only the best-paid roles",
     hero_h1:'Remote jobs that keep you in <span class="rosa">your timezone</span>.',
-    hero_sub:"A tight, curated board of high-paying remote roles open to Latin American talent. We screen out the noise — only the crème de la crème makes it in.",
+    hero_sub:"A tight, curated board of high-paying remote roles — pick where you work from and see only what you can actually apply to. We screen out the noise — only the crème de la crème makes it in.",
     search_ph:"Search role, skill or company…", hero_cta:"Browse roles",
     hero_trust:"Free for job seekers. Every role is screened for pay and seniority — no spam, no low-ball listings.",
-    latam_toggle:"LatAm-friendly only", salaried_toggle:"Salary disclosed", direct_toggle:"Direct apply only", relocate_toggle:"Willing to relocate?", direct_badge:"Direct", apply_direct:"Apply direct →", refresh:"↻ Refresh", loading:"Pulling in today’s remote roles…", load_more:"Load more", match_toggle:"Best matches for me", cv_h:"Match jobs to your CV", cv_sub:"Upload your CV — we’ll score it for ATS-readiness and rank every role by how well it fits. It never leaves your device.", cv_btn:"Upload CV", cv_ats:"ATS-readiness", cv_clear:"Remove CV", dream_ph:"Describe your dream role — e.g. ‘senior product designer at a startup’", dream_go:"Find my match",
+    region_label:"Open to", region_all:"All regions", region_near:"near you", worldwide_badge:"🌍 Worldwide", salaried_toggle:"Salary disclosed", direct_toggle:"Direct apply only", relocate_toggle:"Willing to relocate?", direct_badge:"Direct", apply_direct:"Apply direct →", refresh:"↻ Refresh", loading:"Pulling in today’s remote roles…", load_more:"Load more", match_toggle:"Best matches for me", cv_h:"Match jobs to your CV", cv_sub:"Upload your CV — we’ll score it for ATS-readiness and rank every role by how well it fits. It never leaves your device.", cv_btn:"Upload CV", cv_ats:"ATS-readiness", cv_clear:"Remove CV", dream_ph:"Describe your dream role — e.g. ‘senior product designer at a startup’", dream_go:"Find my match",
     emp_h2:"Hire senior talent that works your hours.",
     emp_lead:"Latin American professionals overlap the full US workday — no 2am standups. Post your remote role in front of a focused, motivated audience.",
     t1_name:"First post", t1_price:"Free", t1_per:"launch offer · 30 days", t1_a:"One live listing for 30 days", t1_b:"Prove the audience, then decide",
@@ -508,17 +568,17 @@ const I18N = {
     post_h2:"Post a role", post_sub:"Send us the details and your listing goes live within a day. First post is free.",
     f_company:"Company", f_role:"Role title", f_link:"Application link", f_email:"Your email", f_details:"Role details (salary, stack, timezone)", f_submit:"Submit listing",
     f_note:"Opens your email app with everything filled in — just hit send.",
-    al_h2:"Get the week’s best roles by email", al_p:"A short weekly digest of the top remote jobs open to LatAm talent. No spam.", al_cta:"Subscribe",
-    ft_tag:"Remote jobs for Latin American talent", ft_credit:"Live roles via Arbeitnow, Remotive & Jobicy", browse_h:"Browse by role", featured_badge:"Featured", pf_h:"Got hired through Remoto? Pay it forward.", pf_sub:"Remoto is free and always will be. If it helped you land a role, chip in whatever you can so we can keep it running — and help the next person find theirs.", pf_btn:"Pay it forward", res_h:"Land the role — and thrive in it", res_sub:"Tools we rate for Latin American talent working with global companies.", res_note:"Some links are affiliate links that support Remoto at no extra cost to you.",
+    al_h2:"Get the week’s best roles by email", al_p:"A short weekly digest of the top remote jobs, wherever you work from. No spam.", al_cta:"Subscribe",
+    ft_tag:"Curated remote jobs, worldwide", ft_credit:"Live roles via Arbeitnow, Remotive & Jobicy", browse_h:"Browse by role", featured_badge:"Featured", pf_h:"Got hired through Remoto? Pay it forward.", pf_sub:"Remoto is free and always will be. If it helped you land a role, chip in whatever you can so we can keep it running — and help the next person find theirs.", pf_btn:"Pay it forward", res_h:"Land the role — and thrive in it", res_sub:"Tools we rate for Latin American talent working with global companies.", res_note:"Some links are affiliate links that support Remoto at no extra cost to you.",
     latam_badge:"LatAm-friendly", apply:"Apply →", posted:"Posted", results:(n)=>`${n} curated roles`, none_h:"No roles match that yet",
-    none_p:"Try a different search or turn off the LatAm-only filter.", updated:(t)=>`updated ${t}`, err_h:"Couldn’t reach the job feeds",
+    none_p:"Try a different search, or switch the region to “All regions”.", updated:(t)=>`updated ${t}`, err_h:"Couldn’t reach the job feeds",
     err_p:"This page loads live jobs over the network. Host it (or serve it locally) and it’ll fill right up. Tap refresh to try again." },
   es:{ nav_post:"Publicar empleo", hero_kicker:"Selección curada · solo los mejor pagados",
     hero_h1:'Empleos remotos que respetan <span class="rosa">tu zona horaria</span>.',
-    hero_sub:"Un tablero curado de empleos remotos bien pagados, abiertos a talento latinoamericano. Filtramos el ruido — solo la crème de la crème entra.",
+    hero_sub:"Un tablero curado de empleos remotos bien pagados — elige desde dónde trabajas y ve solo a lo que realmente puedes aplicar. Filtramos el ruido — solo la crème de la crème entra.",
     search_ph:"Busca puesto, habilidad o empresa…", hero_cta:"Ver vacantes",
     hero_trust:"Gratis para candidatos. Cada vacante se filtra por salario y seniority — sin spam, sin ofertas mediocres.",
-    latam_toggle:"Solo abiertas a LatAm", salaried_toggle:"Con salario", direct_toggle:"Solo aplicación directa", relocate_toggle:"¿Dispuesto a mudarte?", direct_badge:"Directo", apply_direct:"Aplica directo →", refresh:"↻ Actualizar", loading:"Cargando las vacantes de hoy…", load_more:"Ver más", match_toggle:"Mejores para mí", cv_h:"Empareja empleos con tu CV", cv_sub:"Sube tu CV — lo evaluamos para compatibilidad ATS y ordenamos cada vacante según qué tan bien encaja. Nunca sale de tu dispositivo.", cv_btn:"Subir CV", cv_ats:"Compatibilidad ATS", cv_clear:"Quitar CV", dream_ph:"Describe tu empleo ideal — ej. ‘diseñador de producto senior en una startup’", dream_go:"Buscar mi match",
+    region_label:"Abierta a", region_all:"Todas las regiones", region_near:"cerca de ti", worldwide_badge:"🌍 Global", salaried_toggle:"Con salario", direct_toggle:"Solo aplicación directa", relocate_toggle:"¿Dispuesto a mudarte?", direct_badge:"Directo", apply_direct:"Aplica directo →", refresh:"↻ Actualizar", loading:"Cargando las vacantes de hoy…", load_more:"Ver más", match_toggle:"Mejores para mí", cv_h:"Empareja empleos con tu CV", cv_sub:"Sube tu CV — lo evaluamos para compatibilidad ATS y ordenamos cada vacante según qué tan bien encaja. Nunca sale de tu dispositivo.", cv_btn:"Subir CV", cv_ats:"Compatibilidad ATS", cv_clear:"Quitar CV", dream_ph:"Describe tu empleo ideal — ej. ‘diseñador de producto senior en una startup’", dream_go:"Buscar mi match",
     emp_h2:"Contrata talento senior en tu horario.",
     emp_lead:"Los profesionales de Latinoamérica coinciden con toda la jornada de EE. UU. Publica tu vacante remota frente a una audiencia enfocada y motivada.",
     t1_name:"Primera publicación", t1_price:"Gratis", t1_per:"oferta de lanzamiento · 30 días", t1_a:"Una vacante activa por 30 días", t1_b:"Comprueba la audiencia y decide",
@@ -528,17 +588,21 @@ const I18N = {
     post_h2:"Publica una vacante", post_sub:"Envíanos los detalles y tu vacante estará en vivo en un día. La primera es gratis.",
     f_company:"Empresa", f_role:"Puesto", f_link:"Enlace para postularse", f_email:"Tu correo", f_details:"Detalles (salario, stack, zona horaria)", f_submit:"Enviar vacante",
     f_note:"Abre tu correo con todo listo — solo dale enviar.",
-    al_h2:"Recibe las mejores vacantes por correo", al_p:"Un resumen semanal de los mejores empleos remotos abiertos a talento LatAm. Sin spam.", al_cta:"Suscribirme",
-    ft_tag:"Empleos remotos para talento latinoamericano", ft_credit:"Vacantes en vivo vía Arbeitnow, Remotive y Jobicy", browse_h:"Explora por rol", featured_badge:"Destacada", pf_h:"¿Conseguiste empleo con Remoto? Págalo hacia adelante.", pf_sub:"Remoto es gratis y siempre lo será. Si te ayudó a conseguir trabajo, aporta lo que puedas para mantenerlo — y ayudar a que la siguiente persona encuentre el suyo.", pf_btn:"Pagar hacia adelante", res_h:"Consigue el puesto — y triunfa en él", res_sub:"Herramientas que recomendamos para talento latinoamericano en empresas globales.", res_note:"Algunos enlaces son de afiliado y apoyan a Remoto sin costo extra para ti.",
+    al_h2:"Recibe las mejores vacantes por correo", al_p:"Un resumen semanal de los mejores empleos remotos, trabajes desde donde trabajes. Sin spam.", al_cta:"Suscribirme",
+    ft_tag:"Empleos remotos curados, en todo el mundo", ft_credit:"Vacantes en vivo vía Arbeitnow, Remotive y Jobicy", browse_h:"Explora por rol", featured_badge:"Destacada", pf_h:"¿Conseguiste empleo con Remoto? Págalo hacia adelante.", pf_sub:"Remoto es gratis y siempre lo será. Si te ayudó a conseguir trabajo, aporta lo que puedas para mantenerlo — y ayudar a que la siguiente persona encuentre el suyo.", pf_btn:"Pagar hacia adelante", res_h:"Consigue el puesto — y triunfa en él", res_sub:"Herramientas que recomendamos para talento latinoamericano en empresas globales.", res_note:"Algunos enlaces son de afiliado y apoyan a Remoto sin costo extra para ti.",
     latam_badge:"Abierta a LatAm", apply:"Postularme →", posted:"Publicado", results:(n)=>`${n} vacantes seleccionadas`, none_h:"Aún no hay vacantes que coincidan",
-    none_p:"Prueba otra búsqueda o desactiva el filtro de solo-LatAm.", updated:(t)=>`actualizado ${t}`, err_h:"No se pudo conectar con las fuentes",
+    none_p:"Prueba otra búsqueda o cambia la región a “Todas las regiones”.", updated:(t)=>`actualizado ${t}`, err_h:"No se pudo conectar con las fuentes",
     err_p:"Esta página carga vacantes en vivo por internet. Súbela a un hosting (o sírvela localmente) y se llenará. Toca actualizar para reintentar." }
 };
 
 let LANG = (new URLSearchParams(location.search).get("lang") === "es") ? "es" : "en";
 let ALL_JOBS = [];
 let activeCat = "all";
-let latamOnly = false;
+let regionSel = (()=>{ const q=new URLSearchParams(location.search).get("region");
+  if(q && (q==="all" || REGIONS.some(r=>r.id===q))) return q;
+  try{ const v=localStorage.getItem("remoto_region"); if(v && (v==="all"||REGIONS.some(r=>r.id===v))) return v; }catch(_){}
+  return "all"; })();
+const viewerRegion = () => regionSel!=="all" ? regionSel : tzRegion;
 let salariedOnly = false;
 let directOnly = false;
 let relocateOn = false;
@@ -621,11 +685,6 @@ function dedupe(jobs){
   return out;
 }
 
-function latamScore(j){
-  const hay=(j.location+" "+j.title+" "+(j.tags||[]).join(" ")+" "+stripHtml(j.description)).toLowerCase();
-  if(EXCLUDE_SIGNALS.some(s=>hay.includes(s))) return -1;
-  return LATAM_SIGNALS.some(s=>hay.includes(s)) ? 1 : 0;
-}
 function wordHit(hay,kw){
   let from=0,idx;
   while((idx=hay.indexOf(kw,from))>=0){
@@ -689,7 +748,7 @@ function qualityScore(job){
   let s=0;
   if(sal>=CONFIG.MIN_SALARY) s += 60 + Math.min(60,(sal-CONFIG.MIN_SALARY)/4000);
   if(isSenior(job)) s += 25;
-  if(latamScore(job)===1) s += 20;
+  { const vr=viewerRegion(); if(vr && openTo(job,vr)) s += 20; }
   const dl=stripHtml(job.description||"").length;
   if(dl>300) s+=8; if(dl>800) s+=6;
   if((job.tags||[]).length) s+=4;
@@ -703,7 +762,7 @@ function qualityScore(job){
 function render(){
   const list=document.getElementById("job-list");
   let jobs=(dreamOn?ALL_JOBS.concat(dreamExtra):ALL_JOBS).slice();
-  jobs.forEach(j=>{ j._latam=latamScore(j); j._sal=parseSalary(j); j._pin=isPinned(j)?1:0; j._score=qualityScore(j); if(cvLoaded) j._match=jobMatchPct(j); });
+  jobs.forEach(j=>{ j._sal=parseSalary(j); j._pin=isPinned(j)?1:0; j._score=qualityScore(j); if(cvLoaded) j._match=jobMatchPct(j); });
   let pool;
   if(dreamOn && dreamQuery.trim()){
     const q=dreamQuery.trim();
@@ -713,7 +772,7 @@ function render(){
     jobs = jobs.filter(j=>j._dream>=45);            // precision gate — only real matches
     if(directOnly||CONFIG.DIRECT_APPLY_ONLY) jobs=jobs.filter(j=>j.direct);
     if(salariedOnly) jobs=jobs.filter(j=>j._sal>0);
-    if(latamOnly) jobs=jobs.filter(j=>j._latam===1);
+    if(regionSel!=="all") jobs=jobs.filter(j=>openTo(j,regionSel));
     jobs.sort((a,b)=> (b._dream-a._dream) || (b._score-a._score));
     pool = jobs.slice(0, CONFIG.MAX_JOBS);
     showDreamBanner(q, pool.length, pool.filter(j=>j.web).length);
@@ -727,7 +786,7 @@ function render(){
     }else{
       jobs=jobs.filter(j=>!j.relocate);                 // main board stays remote-only
       jobs=jobs.filter(passesCuration);                 // curation gate: high pay / senior / no junk
-      if(latamOnly) jobs=jobs.filter(j=>j._latam===1);
+      if(regionSel!=="all") jobs=jobs.filter(j=>openTo(j,regionSel));
       jobs=jobs.filter(j=>catMatch(j,activeCat));
       if(query){ const q=query.toLowerCase(); jobs=jobs.filter(j=>(j.title+" "+j.company+" "+(j.tags||[]).join(" ")).toLowerCase().includes(q)); }
     }
@@ -754,11 +813,14 @@ function render(){
   }
 
   list.innerHTML = visible.map(j=>{
-    const friendly = j._latam===1;
+    const ri = regionInfo(j), vr = viewerRegion();
     const tags = (j.tags||[]).slice(0,3).map(x=>`<span class="tag">${esc(x)}</span>`).join("");
     const salTxt = j.salary || (j._sal ? `$${Math.round(j._sal/1000)}k` : "");
     const sal = salTxt?`<span class="tag salary">${esc(salTxt)}</span>`:"";
-    const badge = friendly?`<span class="tag latam">${esc(t("latam_badge"))}</span>`:"";
+    let badge = "";
+    if(ri.global) badge = `<span class="tag latam">${esc(t("worldwide_badge"))}</span>`;
+    else if(vr && ri.regions.has(vr)) badge = `<span class="tag latam">${esc((LANG==="es"?"Abierta a ":"Open to ")+regionName(vr,true))}</span>`;
+    else if(ri.regions.size) badge = `<span class="tag region">${esc([...ri.regions].map(r=>regionName(r,true)).join(" · "))}</span>`;
     const direct = j.direct?`<span class="tag direct">${esc(t("direct_badge"))}</span>`:"";
     const match = cvLoaded?`<span class="tag match ${j._match>=70?'hi':j._match>=40?'mid':'lo'}">${j._match}% ${LANG==="es"?"afín":"match"}</span>`:"";
     const feat = j._pin?`<span class="tag featured">★ ${esc(t("featured_badge"))}</span>`:"";
@@ -791,7 +853,7 @@ function injectJobsLD(jobs){
       "employmentType":"FULL_TIME",
       "hiringOrganization":{"@type":"Organization","name":j.company},
       "jobLocationType":"TELECOMMUTE",
-      "applicantLocationRequirements":{"@type":"Country","name":"Latin America"},
+      ...(j.location?{"applicantLocationRequirements":{"@type":"AdministrativeArea","name":j.location}}:{}),
       "directApply":false,
       "url":j.url
     }
@@ -812,7 +874,7 @@ function applyLang(){
   document.querySelectorAll("[data-i18n]").forEach(el=>{ const k=el.getAttribute("data-i18n"); if(I18N[LANG][k]!=null) el.innerHTML=I18N[LANG][k]; });
   document.querySelectorAll("[data-i18n-ph]").forEach(el=>{ const k=el.getAttribute("data-i18n-ph"); if(I18N[LANG][k]!=null) el.placeholder=I18N[LANG][k]; });
   document.querySelectorAll(".langtog button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.lang===LANG));
-  buildChips(); if(ALL_JOBS.length) render();
+  buildChips(); if(typeof buildRegionSelect==="function") buildRegionSelect(); if(ALL_JOBS.length) render();
 }
 function toast(msg){ const el=document.getElementById("toast"); el.textContent=msg; el.classList.add("show"); setTimeout(()=>el.classList.remove("show"),3200); }
 
@@ -841,7 +903,14 @@ document.querySelectorAll(".langtog button").forEach(b=>b.onclick=()=>{ LANG=b.d
 
 /* search (hero + live) */
 document.getElementById("hero-search").addEventListener("input",e=>{ query=e.target.value; shown=CONFIG.PAGE_SIZE; if(ALL_JOBS.length) render(); });
-document.getElementById("latam-only").addEventListener("change",e=>{ latamOnly=e.target.checked; shown=CONFIG.PAGE_SIZE; render(); });
+function buildRegionSelect(){
+  const sel=document.getElementById("region"); if(!sel) return;
+  const near=t("region_near");
+  sel.innerHTML=`<option value="all">${esc(t("region_all"))}</option>`+REGIONS.map(r=>`<option value="${r.id}">${esc(r[LANG])}${r.id===tzRegion?` (${esc(near)})`:""}</option>`).join("");
+  sel.value=regionSel;
+}
+buildRegionSelect();
+document.getElementById("region").addEventListener("change",e=>{ regionSel=e.target.value; try{ localStorage.setItem("remoto_region",regionSel); }catch(_){} shown=CONFIG.PAGE_SIZE; render(); });
 document.getElementById("salaried-only").addEventListener("change",e=>{ salariedOnly=e.target.checked; shown=CONFIG.PAGE_SIZE; render(); });
 document.getElementById("direct-only").addEventListener("change",e=>{ directOnly=e.target.checked; shown=CONFIG.PAGE_SIZE; render(); });
 document.getElementById("relocate-on").addEventListener("change",e=>{ relocateOn=e.target.checked; shown=CONFIG.PAGE_SIZE; render(); });
