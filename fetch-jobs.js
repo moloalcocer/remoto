@@ -117,6 +117,46 @@ const COMPANIES = [
   { name:"NVIDIA",  ats:"workday", url:"https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite", domain:"nvidia.com" },
   { name:"Adobe",   ats:"workday", url:"https://adobe.wd5.myworkdayjobs.com/external_experienced", domain:"adobe.com" },
 
+  // ---- Europe-based / Europe-hiring (remote roles open to Europe & UK) ----
+  { name:"Canonical",    ats:"greenhouse", token:"canonical",    domain:"canonical.com" },
+  { name:"Elastic",      ats:"greenhouse", token:"elastic",      domain:"elastic.co" },
+  { name:"Grafana Labs", ats:"greenhouse", token:"grafanalabs",  domain:"grafana.com" },
+  { name:"N26",          ats:"greenhouse", token:"n26",          domain:"n26.com" },
+  { name:"Monzo",        ats:"greenhouse", token:"monzo",        domain:"monzo.com" },
+  { name:"Adyen",        ats:"greenhouse", token:"adyen",        domain:"adyen.com" },
+  { name:"GetYourGuide", ats:"greenhouse", token:"getyourguide", domain:"getyourguide.com" },
+  { name:"Contentful",   ats:"greenhouse", token:"contentful",   domain:"contentful.com" },
+  { name:"Celonis",      ats:"greenhouse", token:"celonis",      domain:"celonis.com" },
+  { name:"Babbel",       ats:"greenhouse", token:"babbel",       domain:"babbel.com" },
+  { name:"Miro",         ats:"greenhouse", token:"realtimeboardglobal", domain:"miro.com" },
+  { name:"Wikimedia",    ats:"greenhouse", token:"wikimedia",    domain:"wikimedia.org" },
+  { name:"Mozilla",      ats:"greenhouse", token:"mozilla",      domain:"mozilla.org" },
+  { name:"Proton",       ats:"greenhouse", token:"proton",       domain:"proton.me" },
+  { name:"Trade Republic", ats:"greenhouse", token:"traderepublicbank", domain:"traderepublic.com" },
+  { name:"TravelPerk",   ats:"greenhouse", token:"travelperk",   domain:"travelperk.com" },
+  { name:"HelloFresh",   ats:"greenhouse", token:"hellofresh",   domain:"hellofresh.com" },
+  { name:"Wayve",        ats:"greenhouse", token:"wayve",        domain:"wayve.ai" },
+  { name:"Remote.com",   ats:"greenhouse", token:"remotecom",    domain:"remote.com" },
+  { name:"Synthesia",    ats:"ashby", token:"synthesia",  domain:"synthesia.io" },
+  { name:"Supabase",     ats:"ashby", token:"supabase",   domain:"supabase.com" },
+  { name:"PostHog",      ats:"ashby", token:"posthog",    domain:"posthog.com" },
+  { name:"n8n",          ats:"ashby", token:"n8n",        domain:"n8n.io" },
+  { name:"Lovable",      ats:"ashby", token:"lovable",    domain:"lovable.dev" },
+  { name:"DeepL",        ats:"ashby", token:"DeepL",      domain:"deepl.com" },
+  { name:"Pitch",        ats:"ashby", token:"pitch",      domain:"pitch.com" },
+  { name:"Paddle",       ats:"ashby", token:"paddle",     domain:"paddle.com" },
+  { name:"Oyster",       ats:"ashby", token:"oyster",     domain:"oysterhr.com" },
+  { name:"Pleo",         ats:"ashby", token:"pleo",       domain:"pleo.io" },
+  { name:"Preply",       ats:"ashby", token:"preply",     domain:"preply.com" },
+  { name:"Spotify",      ats:"lever", token:"spotify",    domain:"spotify.com" },
+  { name:"Mistral AI",   ats:"lever", token:"mistral",    domain:"mistral.ai" },
+  { name:"Qonto",        ats:"lever", token:"qonto",      domain:"qonto.com" },
+  { name:"Alan",         ats:"lever", token:"alan",       domain:"alan.com" },
+  { name:"Cabify",       ats:"lever", token:"cabify",     domain:"cabify.com" },
+  { name:"Delivery Hero", ats:"smartrecruiters", token:"DeliveryHero", domain:"deliveryhero.com" },
+  { name:"Bosch",        ats:"smartrecruiters", token:"BoschGroup",   domain:"bosch.com" },
+  { name:"Doctolib",     ats:"workable", token:"doctolib", domain:"doctolib.fr" },
+
   // Tokens are researched but not individually test-run here. After your first daily run,
   // check the Actions log: any company showing 0 jobs just needs its slug corrected —
   // open that company's careers page and copy the token from the URL. Failures are silent
@@ -218,7 +258,7 @@ async function sourceCompanies(){
 /* ---------- free remote feeds ---------- */
 async function arbeitnow(){
   const out=[];
-  for(let p=1;p<=3;p++){
+  for(let p=1;p<=5;p++){
     try{ const r=await fetch(`https://www.arbeitnow.com/api/job-board-api?page=${p}`); const j=await r.json();
       (j.data||[]).forEach(x=>{ if(!x.remote) return;
         out.push({ id:"an-"+x.slug, title:x.title, company:x.company_name, url:x.url, remote:true, relocate:false, direct:false,
@@ -271,16 +311,17 @@ function dedupe(a){ const s=new Set(),o=[]; for(const j of a){ const k=(j.compan
 
 function diversify(list, perCompany, total){
   const seen={}, out=[];
-  for(const j of list){ const k=j.source||j.company||"?"; seen[k]=(seen[k]||0)+1; if(seen[k]>perCompany) continue; out.push(j); if(out.length>=total) break; }
+  for(const j of list){ const k=j.company||j.source||"?"; seen[k]=(seen[k]||0)+1; if(seen[k]>perCompany) continue; out.push(j); if(out.length>=total) break; }
   return out;
 }
 
 (async()=>{
-  // CRÈME-DE-LA-CRÈME POLICY: the board is sourced ONLY from the curated roster of
-  // great companies (direct ATS feeds). The generic aggregators (Arbeitnow/Remotive/
-  // Jobicy) are deliberately NOT used here — they're the recycled listings every other
+  // CRÈME-DE-LA-CRÈME POLICY: the board is sourced mainly from the curated roster of
+  // great companies (direct ATS feeds), plus a capped slice of Arbeitnow for Europe.
+  // Remotive/Jobicy are deliberately NOT used here — they're the recycled listings every other
   // site shows. They live only inside Dream search, where a wide net is wanted on demand.
-  const companyArr = await sourceCompanies();
+  const [companyArr, arbeitnowArr] = await Promise.all([sourceCompanies(), arbeitnow()]);
+  console.log(`  Arbeitnow feed (remote, mostly Europe): ${arbeitnowArr.length}`);
 
   // Remote company roles → main board; onsite roster roles → relocate tab.
   const remoteCompany = companyArr.filter(j=>j.remote);
@@ -289,7 +330,15 @@ function diversify(list, perCompany, total){
   let main = dedupe(remoteCompany.filter(keep));
   main.forEach(j=>j.relocate=false);
   main.sort((a,b)=> scoreOf(b)-scoreOf(a) || new Date(b.created)-new Date(a.created));
-  main = diversify(main, 8, 300);   // every role is direct-from-a-great-company
+  main = diversify(main, 8, 300);   // direct-from-a-great-company roles
+
+  // Arbeitnow: remote roles from (mostly European) employers, so people in Europe
+  // have more to apply to. Same junk/low-pay filter; capped so the roster stays on top.
+  const rosterKeys = new Set(main.map(j=>(j.company+"|"+j.title).toLowerCase()));
+  let europe = dedupe(arbeitnowArr.filter(keep)).filter(j=>!rosterKeys.has((j.company+"|"+j.title).toLowerCase()));
+  europe.sort((a,b)=> scoreOf(b)-scoreOf(a) || new Date(b.created)-new Date(a.created));
+  europe = diversify(europe, 3, 120);
+  main = main.concat(europe);
 
   let relocate = dedupe(onsite.filter(j=>!isJunk(j)));
   relocate.forEach(j=>j.relocate=true);
