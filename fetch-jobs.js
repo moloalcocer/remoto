@@ -102,10 +102,20 @@ const COMPANIES = [
   { name:"Hugging Face",    ats:"workable", token:"huggingface",    domain:"huggingface.co" },
   { name:"Square Enix",     ats:"workable", token:"square-enix",     domain:"square-enix.com" },
   { name:"Keywords Studios",ats:"smartrecruiters", token:"KeywordsStudios",domain:"keywordsstudios.com" },
+  { name:"Team17",          ats:"workable", token:"team-17-digital", domain:"team17.com" },
   { name:"Rebellion",       ats:"workable", token:"rebellion",      domain:"rebellion.com" },
 
   // ---- Workday (paste the careers URL ending in myworkdayjobs.com/…) ----
   { name:"Disney",  ats:"workday", url:"https://disney.wd5.myworkdayjobs.com/disneycareer", domain:"disney.com" },
+  { name:"Unity",   ats:"workday", url:"https://unitytech.wd1.myworkdayjobs.com/unity", domain:"unity.com" },
+
+  // ---- Custom connectors (companies on their own hiring systems) ----
+  // Netflix: Eightfold (explore.jobs.netflix.net) — moved off Workday in late Oct 2026
+  { name:"Netflix",  ats:"eightfold", host:"explore.jobs.netflix.net", eightfoldDomain:"netflix.com", domain:"netflix.com" },
+  // Rippling: its own ATS (ats.rippling.com/<token>/jobs)
+  { name:"Rippling", ats:"rippling", token:"rippling", domain:"rippling.com" },
+  // Retool: Gem (jobs.gem.com/<token>)
+  { name:"Retool",   ats:"gem", token:"retool", domain:"retool.com" },
   { name:"NVIDIA",  ats:"workday", url:"https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite", domain:"nvidia.com" },
   { name:"Adobe",   ats:"workday", url:"https://adobe.wd5.myworkdayjobs.com/external_experienced", domain:"adobe.com" },
 
@@ -226,8 +236,52 @@ async function workable(c){
     return norm(c,x.shortcode||x.id||x.title,x.title,url,remote,loc,x.department?[x.department]:[],x.description||"",x.published_on||x.created_at);
   });
 }
+
+/* ---------- custom connectors ---------- */
+// Eightfold career sites (e.g. Netflix). Pages of 10; remote is flagged in work_location_option.
+async function eightfold(c){
+  const out=[]; let total=null;
+  for(let start=0; start<300; start+=10){
+    let j;
+    try{ const r=await fetch(`https://${c.host}/api/apply/v2/jobs?domain=${encodeURIComponent(c.eightfoldDomain)}&start=${start}&num=10&sort_by=timestamp`,{headers:{"Accept":"application/json","User-Agent":"Mozilla/5.0 (compatible; RemotoBot/1.0)"}});
+      if(!r.ok) break; j=await r.json(); }catch(e){ break; }
+    const ps=j.positions||[]; if(total===null) total=j.count||0;
+    if(!ps.length) break;
+    ps.forEach(x=>{
+      const loc=x.location||(x.locations||[])[0]||"";
+      const remote=/^remote/i.test(x.work_location_option||"")||isRemoteText(loc);
+      out.push(norm(c,x.ats_job_id||x.id,x.posting_name||x.name,x.canonicalPositionUrl||`https://${c.host}/careers/job/${x.id}`,
+        remote,loc,x.department?[x.department]:[],x.job_description||"",x.t_create?x.t_create*1000:undefined));
+    });
+    if(total && start+10>=total) break;
+  }
+  return out;
+}
+// Rippling Recruiting public board (no post dates or descriptions in the list endpoint).
+async function rippling(c){
+  const r=await fetch(`https://api.rippling.com/platform/api/ats/v1/board/${c.token}/jobs`);
+  if(!r.ok) return [];
+  const j=await r.json();
+  return (Array.isArray(j)?j:[]).map(x=>{ const loc=(x.workLocation&&x.workLocation.label)||"";
+    return norm(c,x.uuid,(x.name||"").trim(),x.url||`https://ats.rippling.com/${c.token}/jobs/${x.uuid}`,
+      isRemoteText(loc),loc,x.department&&x.department.label?[x.department.label]:[],"",undefined); });
+}
+// Gem job boards (Greenhouse-style JSON).
+async function gem(c){
+  const r=await fetch(`https://api.gem.com/job_board/v0/${c.token}/job_posts/`);
+  if(!r.ok) return [];
+  const j=await r.json();
+  const arr=Array.isArray(j)?j:(j.job_posts||j.jobs||[]);
+  return arr.map(x=>{
+    const loc=(x.location&&(x.location.name||x.location))||(x.offices||[]).map(o=>o.name||o.location||"").filter(Boolean).join("; ")||"";
+    const locStr=typeof loc==="string"?loc:"";
+    const remote=/remote/i.test(String(x.location_type||x.workplace_type||""))||isRemoteText(locStr)||isRemoteText(x.title);
+    return norm(c,x.id||x.absolute_url,x.title||x.name,x.absolute_url||x.url,remote,locStr,
+      (x.departments||[]).map(d=>d.name).filter(Boolean),x.content||x.description||"",x.first_published_at||x.published_at||x.updated_at||x.created_at);
+  });
+}
 async function fetchCompany(c){
-  const fn={greenhouse,lever,ashby,smartrecruiters,amazon:amazonJobs,workday,workable}[c.ats];
+  const fn={greenhouse,lever,ashby,smartrecruiters,amazon:amazonJobs,workday,workable,eightfold,rippling,gem}[c.ats];
   if(!fn) return [];
   try{ const jobs=await fn(c); console.log(`  ${c.name} (${c.ats}): ${jobs.length}`); return jobs; }
   catch(e){ console.error(`  ${c.name} (${c.ats}): ERROR ${e.message}`); return []; }
