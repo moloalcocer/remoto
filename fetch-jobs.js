@@ -280,6 +280,75 @@ async function gem(c){
       (x.departments||[]).map(d=>d.name).filter(Boolean),x.content||x.description||"",x.first_published_at||x.published_at||x.updated_at||x.created_at);
   });
 }
+
+/* ============================================================
+   LANGUAGES — flag roles that need a language other than English,
+   so job seekers see it on the board instead of inside the posting.
+   ============================================================ */
+const LANG_ENT={"&nbsp;":" ","&amp;":"&","&lt;":"<","&gt;":">","&quot;":'"',"&#39;":"'"};
+const langText=h=>(h||"").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/<[^>]*>/g," ").replace(/&[a-z#0-9]+;/gi,m=>LANG_ENT[m]||" ").replace(/\s+/g," ").trim();
+/* Detect non-English languages a role REQUIRES. Returns e.g. ["German"]. */
+const LANGS = {
+  German:["german","deutsch"], French:["french","français","francais"], Spanish:["spanish","español","espanol","castellano"],
+  Portuguese:["portuguese","português","portugues"], Italian:["italian","italiano"], Dutch:["dutch","nederlands","flemish"],
+  Polish:["polish","polski"], Swedish:["swedish","svenska"], Danish:["danish","dansk"], Norwegian:["norwegian","norsk"],
+  Finnish:["finnish","suomi"], Czech:["czech"], Turkish:["turkish"], Greek:["greek"], Romanian:["romanian"],
+  Hungarian:["hungarian"], Russian:["russian"], Ukrainian:["ukrainian"], Hebrew:["hebrew"], Arabic:["arabic"],
+  Japanese:["japanese"], Korean:["korean"], Mandarin:["mandarin","chinese","cantonese"], Hindi:["hindi"],
+  Indonesian:["indonesian","bahasa"], Vietnamese:["vietnamese"], Thai:["thai"]
+};
+/* Common short words used to spot a posting written in another language. */
+const STOP = {
+  German:["und","der","die","das","mit","für","wir","sie","nicht","ist","auf","eine","einen","bei","unsere","deine","du","dich","ihre","oder","als","auch"],
+  French:["et","les","des","pour","nous","vous","une","avec","dans","sur","est","vos","notre","votre","aux","sont"],
+  Spanish:["y","los","las","para","con","una","del","nuestro","nuestra","somos","buscamos","experiencia","tu","sus","como","más"],
+  Portuguese:["e","os","as","para","com","uma","nosso","nossa","você","não","são","buscamos","experiência","seu","sua"],
+  Dutch:["en","het","een","voor","met","wij","jij","je","van","naar","zijn","onze","niet","ook"],
+  Italian:["e","il","per","con","una","che","del","della","nostro","nostra","sono","siamo","tuo"],
+  Polish:["i","w","na","z","dla","jest","się","oraz","nie","jako","przez"]
+};
+const NICE = /\b(plus|bonus|nice[- ]to[- ]haves?|bonus points|preferred|advantage|advantageous|desirable|beneficial|helpful|a big plus|is a plus|optional|welcome)\b/i;
+
+function writtenIn(text){
+  const words=(text.toLowerCase().match(/[a-zà-ÿßäöüñç]+/g)||[]).slice(0,600);
+  if(words.length<40) return null;
+  const en=new Set(["the","and","to","of","a","in","you","we","with","for","our","is","are","your","on","as","be","will","this","that"]);
+  const enHits=words.filter(w=>en.has(w)).length/words.length;
+  let best=null,bestScore=0;
+  for(const [lang,list] of Object.entries(STOP)){ const set=new Set(list); const sc=words.filter(w=>set.has(w)).length/words.length; if(sc>bestScore){bestScore=sc;best=lang;} }
+  return (bestScore>0.08 && bestScore>enHits*1.3) ? best : null;
+}
+function requiredLanguages(job){
+  const text=langText((job.title||"")+" . "+(job.description||""));
+  const low=text.toLowerCase();
+  const found=new Set();
+  const w=writtenIn(langText(job.description||"")); if(w) found.add(w);
+  const REQ="(?:fluent|fluency|native|proficient|proficiency|business[- ]level|business[- ]fluent|professional(?: working)?|excellent|strong|very good|good|advanced|full professional|written and (?:spoken|verbal)|spoken and written|verbal and written|c1|c2|b2)";
+  for(const [lang,names] of Object.entries(LANGS)){
+    for(const n of names){
+      const nm=n.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+      const pats=[
+        new RegExp(`\\b${REQ}\\b[^.;\\n]{0,40}?\\b${nm}\\b`,"gi"),          // fluent (in) German
+        new RegExp(`\\b${nm}\\b[- ]?(?:speaking|speaker|native|fluent)\\b`,"gi"), // German-speaking
+        new RegExp(`\\b${nm}\\b(?: language)?(?: skills?| proficiency)?\\s*(?:\\(|is |are )?(?:required|mandatory|a must|essential|needed)`,"gi"),
+        new RegExp(`\\b(?:speak|speaks|speaking|write|writes) (?:fluent |native )?${nm}\\b`,"gi"),
+        new RegExp(`\\b${nm}\\b\\s*\\((?:c1|c2|b2|native|fluent)`,"gi")
+      ];
+      for(const re of pats){
+        let m; while((m=re.exec(low))){
+          const around=low.slice(Math.max(0,m.index-120), m.index+m[0].length+60);
+          if(NICE.test(around)) continue;
+          if(lang==="Spanish" && /latam|latin america/.test(around) && !/fluent|native|required/.test(m[0])) continue;
+          found.add(lang); break;
+        }
+        if(found.has(lang)) break;
+      }
+      if(found.has(lang)) break;
+    }
+  }
+  return [...found];
+}
+
 async function fetchCompany(c){
   const fn={greenhouse,lever,ashby,smartrecruiters,amazon:amazonJobs,workday,workable,eightfold,rippling,gem}[c.ats];
   if(!fn) return [];
@@ -373,7 +442,7 @@ function diversify(list, perCompany, total){
   let main = dedupe(remoteCompany.filter(keep));
   main.forEach(j=>j.relocate=false);
   main.sort((a,b)=> scoreOf(b)-scoreOf(a) || new Date(b.created)-new Date(a.created));
-  main = diversify(main, 8, 300);   // direct-from-a-great-company roles
+  main = diversify(main, 8, 600);   // direct-from-a-great-company roles
 
   // Arbeitnow: remote roles from (mostly European) employers, so people in Europe
   // have more to apply to. Same junk/low-pay filter; capped so the roster stays on top.
@@ -386,9 +455,18 @@ function diversify(list, perCompany, total){
   let relocate = dedupe(onsite.filter(j=>!isJunk(j)));
   relocate.forEach(j=>j.relocate=true);
   relocate.sort((a,b)=> scoreOf(b)-scoreOf(a) || new Date(b.created)-new Date(a.created));
-  relocate = diversify(relocate, 8, 160);
+  relocate = diversify(relocate, 8, 250);
 
-  const outAll = main.concat(relocate);
+  // Keep jobs.json light: save the detected salary, then trim descriptions to plain
+  // text — the opening plus the closing section (pay ranges and location rules live there).
+  const ENT={"&nbsp;":" ","&amp;":"&","&lt;":"<","&gt;":">","&quot;":'"',"&#39;":"'"};
+  const toText=h=>(h||"").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/<[^>]*>/g," ").replace(/&[a-z#0-9]+;/gi,m=>ENT[m]||" ").replace(/\s+/g," ").trim();
+  const outAll = main.concat(relocate).map(j=>{
+    if(!j.salary){ const sal=salaryOf(j); if(sal>=30000) j.salary=`$${Math.round(sal/1000)}k`; }
+    const langs=requiredLanguages(j); if(langs.length) j.languages=langs;   // before trimming the description
+    let d=toText(j.description); if(d.length>3600) d=d.slice(0,2500)+" … "+d.slice(-1000);
+    j.description=d; return j;
+  });
   fs.writeFileSync("jobs.json", JSON.stringify(outAll));
   const cos = new Set(outAll.map(j=>j.company)).size;
   console.log(`Wrote ${main.length} remote + ${relocate.length} relocation roles from ${cos} companies to jobs.json`);

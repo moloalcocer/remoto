@@ -56,6 +56,8 @@
     --jade:#0E7C66;       /* agave jade — live + latam-friendly */
     --jade-soft:#e4f2ee;
     --muted:#6b7488;
+    --amber:#8a5300;      /* language-required badge */
+    --amber-soft:#fdf0d5;
     --radius:14px;
     --maxw:1080px;
   }
@@ -63,13 +65,13 @@
     :root{
       --ink:#EDEFF5; --ink-soft:#b9c0d0; --paper:#0D1526; --paper-2:#141f36;
       --line:#243350; --rosa:#ff4fa6; --rosa-ink:#ff7bbd; --jade:#38b39a;
-      --jade-soft:#12312b; --muted:#8a94ac;
+      --jade-soft:#12312b; --muted:#8a94ac; --amber:#f5c46b; --amber-soft:#3a2c10;
     }
   }
   :root[data-theme="light"]{
     --ink:#12203A; --ink-soft:#3a4a68; --paper:#FBFAF7; --paper-2:#F1EFE8;
     --line:#E2DFD5; --rosa:#E4007C; --rosa-ink:#B10061; --jade:#0E7C66;
-    --jade-soft:#e4f2ee; --muted:#6b7488;
+    --jade-soft:#e4f2ee; --muted:#6b7488; --amber:#8a5300; --amber-soft:#fdf0d5;
   }
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
@@ -146,6 +148,7 @@
   .tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
   .tag{font-size:12px;font-weight:600;color:var(--ink-soft);background:var(--paper-2);border:1px solid var(--line);padding:3px 9px;border-radius:7px}
   .tag.latam{color:#fff;background:var(--jade);border-color:var(--jade)}
+  .tag.lang{color:var(--amber);background:var(--amber-soft);border-color:transparent}
   .tag.region{color:var(--jade);background:var(--jade-soft);border-color:transparent}
   .region-pick{display:inline-flex;align-items:center;gap:8px;font-weight:600;color:var(--ink)}
   .region-pick select{font:inherit;font-weight:600;color:var(--ink);background:var(--paper-2);border:1px solid var(--line);border-radius:999px;padding:5px 12px;cursor:pointer}
@@ -821,6 +824,9 @@ function render(){
     if(ri.global) badge = `<span class="tag latam">${esc(t("worldwide_badge"))}</span>`;
     else if(vr && ri.regions.has(vr)) badge = `<span class="tag latam">${esc((LANG==="es"?"Abierta a ":"Open to ")+regionName(vr,true))}</span>`;
     else if(ri.regions.size) badge = `<span class="tag region">${esc([...ri.regions].map(r=>regionName(r,true)).join(" · "))}</span>`;
+    const LANG_ES={German:"alemán",French:"francés",Spanish:"español",Portuguese:"portugués",Italian:"italiano",Dutch:"neerlandés",Polish:"polaco",Swedish:"sueco",Danish:"danés",Norwegian:"noruego",Finnish:"finés",Czech:"checo",Turkish:"turco",Greek:"griego",Romanian:"rumano",Hungarian:"húngaro",Russian:"ruso",Ukrainian:"ucraniano",Hebrew:"hebreo",Arabic:"árabe",Japanese:"japonés",Korean:"coreano",Mandarin:"chino",Hindi:"hindi",Indonesian:"indonesio",Vietnamese:"vietnamita",Thai:"tailandés"};
+    const langs = (j.languages||[]).map(l=>LANG==="es"?(LANG_ES[l]||l):l);
+    const langTag = langs.length?`<span class="tag lang" title="${esc(LANG==="es"?"Este puesto requiere "+langs.join(" y "):"This role requires "+langs.join(" and "))}">🗣 ${esc(LANG==="es"?"Requiere "+langs.join(" + "):langs.join(" + ")+" required")}</span>`:"";
     const direct = j.direct?`<span class="tag direct">${esc(t("direct_badge"))}</span>`:"";
     const match = cvLoaded?`<span class="tag match ${j._match>=70?'hi':j._match>=40?'mid':'lo'}">${j._match}% ${LANG==="es"?"afín":"match"}</span>`:"";
     const feat = j._pin?`<span class="tag featured">★ ${esc(t("featured_badge"))}</span>`:"";
@@ -831,7 +837,7 @@ function render(){
       <div>
         <h3>${esc(j.title)}</h3>
         <div class="co">${esc(j.company)}${j.location?` · ${esc(j.location)}`:""}</div>
-        <div class="tags">${feat}${web}${match}${direct}${badge}${sal}${tags}</div>
+        <div class="tags">${langTag}${feat}${web}${match}${direct}${badge}${sal}${tags}</div>
       </div>
       <div class="side"><span class="apply">${esc(applyTxt)}</span><span>${esc(timeAgo(j.created))}</span></div>
     </a>`;
