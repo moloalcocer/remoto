@@ -318,6 +318,11 @@
         <span data-i18n="region_label">Open to</span>
         <select id="region"></select>
       </label>
+      <label class="switch" title="Hide roles that require a language other than English">
+        <input type="checkbox" id="english-only" />
+        <span class="track"></span>
+        <span data-i18n="english_toggle">English only</span>
+      </label>
       <label class="switch">
         <input type="checkbox" id="salaried-only" />
         <span class="track"></span>
@@ -561,7 +566,7 @@ const I18N = {
     hero_sub:"A tight, curated board of high-paying remote roles — pick where you work from and see only what you can actually apply to. We screen out the noise — only the crème de la crème makes it in.",
     search_ph:"Search role, skill or company…", hero_cta:"Browse roles",
     hero_trust:"Free for job seekers. Every role is screened for pay and seniority — no spam, no low-ball listings.",
-    region_label:"Open to", region_all:"All regions", region_near:"near you", worldwide_badge:"🌍 Worldwide", salaried_toggle:"Salary disclosed", direct_toggle:"Direct apply only", relocate_toggle:"Willing to relocate?", direct_badge:"Direct", apply_direct:"Apply direct →", refresh:"↻ Refresh", loading:"Pulling in today’s remote roles…", load_more:"Load more", match_toggle:"Best matches for me", cv_h:"Match jobs to your CV", cv_sub:"Upload your CV — we’ll score it for ATS-readiness and rank every role by how well it fits. It never leaves your device.", cv_btn:"Upload CV", cv_ats:"ATS-readiness", cv_clear:"Remove CV", dream_ph:"Describe your dream role — e.g. ‘senior product designer at a startup’", dream_go:"Find my match",
+    english_toggle:"English only", region_label:"Open to", region_all:"All regions", region_near:"near you", worldwide_badge:"🌍 Worldwide", salaried_toggle:"Salary disclosed", direct_toggle:"Direct apply only", relocate_toggle:"Willing to relocate?", direct_badge:"Direct", apply_direct:"Apply direct →", refresh:"↻ Refresh", loading:"Pulling in today’s remote roles…", load_more:"Load more", match_toggle:"Best matches for me", cv_h:"Match jobs to your CV", cv_sub:"Upload your CV — we’ll score it for ATS-readiness and rank every role by how well it fits. It never leaves your device.", cv_btn:"Upload CV", cv_ats:"ATS-readiness", cv_clear:"Remove CV", dream_ph:"Describe your dream role — e.g. ‘senior product designer at a startup’", dream_go:"Find my match",
     emp_h2:"Hire senior talent that works your hours.",
     emp_lead:"Latin American professionals overlap the full US workday — no 2am standups. Post your remote role in front of a focused, motivated audience.",
     t1_name:"First post", t1_price:"Free", t1_per:"launch offer · 30 days", t1_a:"One live listing for 30 days", t1_b:"Prove the audience, then decide",
@@ -581,7 +586,7 @@ const I18N = {
     hero_sub:"Un tablero curado de empleos remotos bien pagados — elige desde dónde trabajas y ve solo a lo que realmente puedes aplicar. Filtramos el ruido — solo la crème de la crème entra.",
     search_ph:"Busca puesto, habilidad o empresa…", hero_cta:"Ver vacantes",
     hero_trust:"Gratis para candidatos. Cada vacante se filtra por salario y seniority — sin spam, sin ofertas mediocres.",
-    region_label:"Abierta a", region_all:"Todas las regiones", region_near:"cerca de ti", worldwide_badge:"🌍 Global", salaried_toggle:"Con salario", direct_toggle:"Solo aplicación directa", relocate_toggle:"¿Dispuesto a mudarte?", direct_badge:"Directo", apply_direct:"Aplica directo →", refresh:"↻ Actualizar", loading:"Cargando las vacantes de hoy…", load_more:"Ver más", match_toggle:"Mejores para mí", cv_h:"Empareja empleos con tu CV", cv_sub:"Sube tu CV — lo evaluamos para compatibilidad ATS y ordenamos cada vacante según qué tan bien encaja. Nunca sale de tu dispositivo.", cv_btn:"Subir CV", cv_ats:"Compatibilidad ATS", cv_clear:"Quitar CV", dream_ph:"Describe tu empleo ideal — ej. ‘diseñador de producto senior en una startup’", dream_go:"Buscar mi match",
+    english_toggle:"Solo en inglés", region_label:"Abierta a", region_all:"Todas las regiones", region_near:"cerca de ti", worldwide_badge:"🌍 Global", salaried_toggle:"Con salario", direct_toggle:"Solo aplicación directa", relocate_toggle:"¿Dispuesto a mudarte?", direct_badge:"Directo", apply_direct:"Aplica directo →", refresh:"↻ Actualizar", loading:"Cargando las vacantes de hoy…", load_more:"Ver más", match_toggle:"Mejores para mí", cv_h:"Empareja empleos con tu CV", cv_sub:"Sube tu CV — lo evaluamos para compatibilidad ATS y ordenamos cada vacante según qué tan bien encaja. Nunca sale de tu dispositivo.", cv_btn:"Subir CV", cv_ats:"Compatibilidad ATS", cv_clear:"Quitar CV", dream_ph:"Describe tu empleo ideal — ej. ‘diseñador de producto senior en una startup’", dream_go:"Buscar mi match",
     emp_h2:"Contrata talento senior en tu horario.",
     emp_lead:"Los profesionales de Latinoamérica coinciden con toda la jornada de EE. UU. Publica tu vacante remota frente a una audiencia enfocada y motivada.",
     t1_name:"Primera publicación", t1_price:"Gratis", t1_per:"oferta de lanzamiento · 30 días", t1_a:"Una vacante activa por 30 días", t1_b:"Comprueba la audiencia y decide",
@@ -605,6 +610,8 @@ let regionSel = (()=>{ const q=new URLSearchParams(location.search).get("region"
   if(q && (q==="all" || REGIONS.some(r=>r.id===q))) return q;
   try{ const v=localStorage.getItem("remoto_region"); if(v && (v==="all"||REGIONS.some(r=>r.id===v))) return v; }catch(_){}
   return "all"; })();
+let englishOnly = (()=>{ const q=new URLSearchParams(location.search).get("english"); if(q!==null) return q==="1";
+  try{ return localStorage.getItem("remoto_english_only")==="1"; }catch(_){ return false; } })();
 const viewerRegion = () => regionSel!=="all" ? regionSel : tzRegion;
 let salariedOnly = false;
 let directOnly = false;
@@ -776,6 +783,7 @@ function render(){
     if(directOnly||CONFIG.DIRECT_APPLY_ONLY) jobs=jobs.filter(j=>j.direct);
     if(salariedOnly) jobs=jobs.filter(j=>j._sal>0);
     if(regionSel!=="all") jobs=jobs.filter(j=>openTo(j,regionSel));
+    if(englishOnly) jobs=jobs.filter(j=>!(j.languages&&j.languages.length));
     jobs.sort((a,b)=> (b._dream-a._dream) || (b._score-a._score));
     pool = jobs.slice(0, CONFIG.MAX_JOBS);
     showDreamBanner(q, pool.length, pool.filter(j=>j.web).length);
@@ -790,6 +798,8 @@ function render(){
       jobs=jobs.filter(j=>!j.relocate);                 // main board stays remote-only
       jobs=jobs.filter(passesCuration);                 // curation gate: high pay / senior / no junk
       if(regionSel!=="all") jobs=jobs.filter(j=>openTo(j,regionSel));
+      if(englishOnly) jobs=jobs.filter(j=>!(j.languages&&j.languages.length));
+    if(englishOnly) jobs=jobs.filter(j=>!(j.languages&&j.languages.length));
       jobs=jobs.filter(j=>catMatch(j,activeCat));
       if(query){ const q=query.toLowerCase(); jobs=jobs.filter(j=>(j.title+" "+j.company+" "+(j.tags||[]).join(" ")).toLowerCase().includes(q)); }
     }
@@ -916,6 +926,8 @@ function buildRegionSelect(){
   sel.value=regionSel;
 }
 buildRegionSelect();
+{ const eo=document.getElementById("english-only"); eo.checked=englishOnly;
+  eo.addEventListener("change",e=>{ englishOnly=e.target.checked; try{ localStorage.setItem("remoto_english_only",englishOnly?"1":"0"); }catch(_){} shown=CONFIG.PAGE_SIZE; render(); }); }
 document.getElementById("region").addEventListener("change",e=>{ regionSel=e.target.value; try{ localStorage.setItem("remoto_region",regionSel); }catch(_){} shown=CONFIG.PAGE_SIZE; render(); });
 document.getElementById("salaried-only").addEventListener("change",e=>{ salariedOnly=e.target.checked; shown=CONFIG.PAGE_SIZE; render(); });
 document.getElementById("direct-only").addEventListener("change",e=>{ directOnly=e.target.checked; shown=CONFIG.PAGE_SIZE; render(); });
